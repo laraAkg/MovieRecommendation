@@ -18,7 +18,7 @@ def load_data_from_CSV(filepath: str) -> pd.DataFrame:
         return pd.DataFrame()
 
 if __name__ == "__main__":
-    df = load_data_from_CSV('../data/netflix_titles.csv')
+    df = load_data_from_CSV('./data/netflix_titles.csv')
     required_columns = ['title', 'director', 'cast', 'country', 'date_added', 'release_year', 'rating', 'duration', 'description', 'listed_in', 'type']
     if not validate_data(df, required_columns):
         logging.error("Data validation failed. Program will terminate.")

@@ -2,139 +2,166 @@ import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from sklearn.metrics.pairwise import cosine_similarity
-from scipy.sparse import hstack, csr_matrix
+from scipy.sparse import csr_matrix
+import logging
+import joblib
+from data_processing.database_utils import get_mongo_collection
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 class HybridRecommender:
-    def __init__(self, data_path: str, tfidf_max_features: int = 5000):
-        self.df = pd.read_csv(data_path)
+    """
+    Ein hybrides Empfehlungssystem, das mehrere Features kombiniert,
+    um personalisierte Empfehlungen basierend auf Kosinus-Ähnlichkeit zu generieren.
+    """
+
+    def __init__(self, tfidf_max_features: int = 5000):
+        """
+        Initialisiert das Empfehlungssystem mit dem Dataset und Standardgewichtungen.
+        """
+        # Daten aus MongoDB laden
+        collection = get_mongo_collection('netflix_db', 'netflix_content')
+        logging.info(f"Number of documents in collection: {collection.count_documents({})}")
+        self.df = pd.DataFrame(list(collection.find()))
+
+        # Sicherstellen, dass alle erforderlichen Spalten vorhanden sind
+        required_columns = ['title', 'description', 'director', 'cast', 'listed_in', 
+                            'type', 'country', 'rating', 'release_year', 
+                            'duration_mins', 'duration_seasons']
+        for col in required_columns:
+            if col not in self.df.columns:
+                self.df[col] = 0 if col in ['duration_mins', 'duration_seasons'] else 'Unknown'
+
         self.tfidf_max_features = tfidf_max_features
-        self.feature_matrix = None
+        self.matrices = {}
         self.indices = None
-        print("Recommender initialisiert.")
-
-        # Gewichte (kannst du anpassen)
-        # Normalisiert auf 100%
         self.weights = {
-            'combined': 0.35,   
-            'genre': 0.5,     
-            'cast': 0.1,      
-            'cat': 0.025,     
-            'num': 0.025      
+            'combined': 0.35,
+            'genre': 0.5,
+            'cast': 0.1,
+            'cat': 0.025,
+            'num': 0.025
         }
-
-
-
-
-    def preprocess(self):
-        # Missing Values behandeln
-        self.df['duration_mins'] = self.df['duration'].str.extract(r'(\d+)').astype(float)
-        self.df['duration_mins'] = self.df['duration_mins'].fillna(self.df['duration_mins'].median())
-        self.df['description'] = self.df['description'].fillna('')
-        self.df['cast'] = self.df['cast'].fillna('')
-        self.df['listed_in'] = self.df['listed_in'].fillna('')
-        self.df['country'] = self.df['country'].fillna('Country unknown')
-        self.df['rating'] = self.df['rating'].fillna('Rating unknown')
-        self.df['type'] = self.df['type'].fillna('Type unknown')
-        self.df['release_year'] = self.df['release_year'].fillna(self.df['release_year'].median())
-        self.df['director'] = self.df['director'].fillna('Director unknown')
-        self.df['is_recent'] = (self.df['release_year'] >= 2020).astype(int)
-
-        print("Preprocessing abgeschlossen.")
+        logging.info("Recommender initialized.")
 
     def vectorize_and_combine(self):
-        # Combined-Text: Beschreibung + Regisseur
-        self.df['combined_text'] = (
-            self.df['description'] + ' ' + self.df['director']
-        )
+        """
+        Vektorisiert Text- und kategorische Features, skaliert numerische Features
+        und kombiniert sie in spärlichen Matrizen.
+        """
+        # Kombinierter Text aus Beschreibung und Regisseur
+        self.df['combined_text'] = self.df['description'] + ' ' + self.df['director']
 
-        # TF-IDF auf Combined Text (description + director)
+        # TF-IDF für Textfeatures
         tfidf_combined = TfidfVectorizer(stop_words='english', max_features=self.tfidf_max_features)
-        combined_tfidf = tfidf_combined.fit_transform(self.df['combined_text'])
-
-        # Genre-TFIDF
         tfidf_genre = TfidfVectorizer(tokenizer=lambda x: x.split(', '), lowercase=False)
-        genre_tfidf = tfidf_genre.fit_transform(self.df['listed_in'])
-
-        # Cast-TFIDF (separat!)
         tfidf_cast = TfidfVectorizer(tokenizer=lambda x: x.split(', '), lowercase=False)
-        cast_tfidf = tfidf_cast.fit_transform(self.df['cast'])
 
-        # One-Hot für type, country, rating
-        ohe = OneHotEncoder(handle_unknown='ignore', sparse_output=False)
-        X_cat = ohe.fit_transform(self.df[['type', 'country', 'rating']])
-
-        # Numerische Features
-        scaler = StandardScaler()
-        X_num = scaler.fit_transform(self.df[['release_year', 'duration_mins', 'is_recent']])
-
-        # Sparse-Matrix kombinieren
+        # Matrizen erstellen
         self.matrices = {
-            'combined': combined_tfidf,
-            'genre': genre_tfidf,
-            'cast': cast_tfidf,
-            'cat': csr_matrix(X_cat),
-            'num': csr_matrix(X_num)
+            'combined': tfidf_combined.fit_transform(self.df['combined_text']),
+            'genre': tfidf_genre.fit_transform(self.df['listed_in']),
+            'cast': tfidf_cast.fit_transform(self.df['cast']),
+            'cat': csr_matrix(OneHotEncoder(handle_unknown='ignore', sparse_output=True)
+                              .fit_transform(self.df[['type', 'country', 'rating']])),
+            'num': csr_matrix(StandardScaler().fit_transform(self.df[['release_year', 'duration_mins']]))
         }
 
+        # Indizes für Titel erstellen
         self.indices = pd.Series(self.df.index, index=self.df['title']).drop_duplicates()
-        print("Feature-Matrizen erstellt und gewichtet kombinierbar!")
+        logging.info("Feature-Matrizen erstellt und bereit für die gewichtete Kombination.")
 
-    def get_recommendations(self, title: str, n_recommendations: int = 5):
+    def get_recommendations(self, title: str, n_recommendations: int = 6):
+        """
+        Gibt Empfehlungen basierend auf einem Titel zurück.
+        """
         idx = self.indices.get(title)
         if idx is None:
-            return f"'{title}' wurde nicht im Dataset gefunden."
+            return []
+    
+        # Ähnlichkeiten berechnen
+        sims = {key: cosine_similarity(matrix[idx], matrix)[0] for key, matrix in self.matrices.items()}
+    
+        # Gewichtete Kombination der Ähnlichkeiten
+        combined_sim = sum(sims[key] * self.weights[key] for key in sims)
+    
+        # Top-N-Empfehlungen auswählen
+        sim_indices = combined_sim.argsort()[::-1][1:n_recommendations + 1]
+        recommendations = []
+        for i in sim_indices:
+            recommendations.append({
+                "title": self.df.iloc[i]['title'],
+                "type": self.df.iloc[i]['type'],
+                "country": self.df.iloc[i]['country'],
+                "rating": self.df.iloc[i]['rating'],
+                "listed_in": self.df.iloc[i]['listed_in'],
+                "description": self.df.iloc[i]['description'],  # Include description here
+                "explanation": self.explain_recommendation(self.df.iloc[idx]['title'], self.df.iloc[i]['title']),
+                "similarity": f"{combined_sim[i]:.2f}"
+            })
+        return recommendations
 
-        # Similarities pro Block berechnen
-        sims = {}
-        for key, matrix in self.matrices.items():
-            sims[key] = cosine_similarity(
-                matrix[idx], matrix
-            )[0]
-
-        # Gewichte anwenden
-        combined_sim = sum(
-            sims[key] * self.weights[key] for key in sims
-        )
-
-        sim_indices = combined_sim.argsort()[::-1][1:n_recommendations+1]
-        return self.df[['title', 'type', 'country', 'rating', 'listed_in', 'director', 'cast', 'description']].iloc[sim_indices]
-
-    def explain_recommendation(self, base_title: str, recommended_title: str):
+    def explain_recommendation(self, base_title: str, recommended_title: str) -> dict:
+        """
+        Erklärt, warum ein bestimmter Titel empfohlen wurde.
+        """
         base = self.df[self.df['title'] == base_title].iloc[0]
         rec = self.df[self.df['title'] == recommended_title].iloc[0]
-        explanation = {}
 
-        base_genres = set(base['listed_in'].split(', '))
-        rec_genres = set(rec['listed_in'].split(', '))
-        overlap = base_genres.intersection(rec_genres)
-        explanation['Genre Overlap'] = f"{len(overlap)} gemeinsame Genres ({', '.join(overlap)})" if overlap else "keine"
-
-        # Cast Overlap neu hinzufügen
-        base_cast = set(base['cast'].split(', '))
-        rec_cast = set(rec['cast'].split(', '))
-        cast_overlap = base_cast.intersection(rec_cast)
-        explanation['Cast Overlap'] = f"{len(cast_overlap)} gleiche Schauspieler ({', '.join(cast_overlap)})" if cast_overlap else "keine"
-
-        explanation['Rating Match'] = "Ja" if base['rating'] == rec['rating'] else "Nein"
-        explanation['Country Match'] = "Ja" if base['country'] == rec['country'] else "Nein"
-        explanation['Director Match'] = "Ja" if base['director'] == rec['director'] and base['director'] != "Unknown" else "Nein"
-        explanation['Release Year Abstand'] = abs(base['release_year'] - rec['release_year'])
-
-        # Finaler Ähnlichkeitswert
-        base_idx = base.name
-        rec_idx = rec.name
-        final_score = sum(
-            cosine_similarity(
-                self.matrices[key][base_idx], self.matrices[key][rec_idx]
-            )[0][0] * self.weights[key]
-            for key in self.matrices
-        )
-        explanation['Gesamt-Ähnlichkeit'] = f"{final_score:.2f}"
-
+        explanation = {
+            "Genre Overlap": self._get_overlap(base['listed_in'], rec['listed_in']),
+            "Cast Overlap": self._get_overlap(base['cast'], rec['cast']),
+            "Rating Match": "Yes" if base['rating'] == rec['rating'] else "No",
+            "Country Match": "Yes" if base['country'] == rec['country'] else "No",
+            "Director Match": self._get_director_match(base['director'], rec['director']),
+            "Release Year Difference": abs(base['release_year'] - rec['release_year'])
+        }
         return explanation
 
+    @staticmethod
+    def _get_overlap(base_feature: str, rec_feature: str) -> str:
+        """
+        Berechnet die Überschneidung zwischen zwei Features.
+        """
+        base_set = set(base_feature.split(', '))
+        rec_set = set(rec_feature.split(', '))
+        overlap = base_set.intersection(rec_set)
+        return f"{len(overlap)} shared ({', '.join(overlap)})" if overlap else "None"
+
+    @staticmethod
+    def _get_director_match(base_director: str, rec_director: str) -> str:
+        """
+        Überprüft, ob die Regisseure übereinstimmen.
+        """
+        if base_director == "Unknown" or rec_director == "Unknown":
+            return "No (Unknown Director)"
+        return "Yes" if base_director == rec_director else "No"
+
+    def save_model(self, filepath: str):
+        """
+        Speichert das Modell in einer Datei.
+        """
+        try:
+            joblib.dump(self, filepath)
+            logging.info(f"Modell erfolgreich gespeichert unter: {filepath}")
+        except Exception as e:
+            logging.error(f"Fehler beim Speichern des Modells: {e}")
+
+    @staticmethod
+    def load_model(filepath: str):
+        """
+        Lädt ein gespeichertes Modell aus einer Datei.
+        """
+        try:
+            model = joblib.load(filepath)
+            logging.info(f"Modell erfolgreich geladen von: {filepath}")
+            return model
+        except Exception as e:
+            logging.error(f"Fehler beim Laden des Modells: {e}")
+            return None
+
+
 if __name__ == "__main__":
-    recommender = HybridRecommender('data/netflix_titles_clean.csv')
-    recommender.preprocess()
+    recommender = HybridRecommender()
     recommender.vectorize_and_combine()
-    print(recommender.get_recommendations('Breaking Bad'))
+    recommender.save_model("models/hybrid_recommender_model.pkl")
