@@ -49,10 +49,20 @@ class HybridRecommender:
         Vektorisiert Text- und kategorische Features, skaliert numerische Features
         und kombiniert sie in spärlichen Matrizen.
         """
-        # Kombinierter Text aus Beschreibung und Regisseur
-        self.df['combined_text'] = self.df['description'] + ' ' + self.df['director']
+        # Hilfsfunktion zur Bereinigung von 'Unknown'-Einträgen
+        def clean_unknown(value: str, unknown_terms: list = ["unknown", "unknown director", "unknown cast"]) -> str:
+            if isinstance(value, str) and any(term in value.lower() for term in unknown_terms):
+                return ""
+            return value
+        
+        # Bereinigte Versionen für director und cast erstellen
+        self.df['director_clean'] = self.df['director'].apply(lambda x: clean_unknown(x, ["unknown", "unknown director"]))
+        self.df['cast_clean'] = self.df['cast'].apply(lambda x: clean_unknown(x, ["unknown", "unknown cast"]))
 
-        # TF-IDF für Textfeatures
+        # Kombinierter Text aus Beschreibung und bereinigtem Regisseur
+        self.df['combined_text'] = self.df['description'] + ' ' + self.df['director_clean']
+
+        # TF-IDF Vektorisierung für Textfeatures
         tfidf_combined = TfidfVectorizer(stop_words='english', max_features=self.tfidf_max_features)
         tfidf_genre = TfidfVectorizer(tokenizer=lambda x: x.split(', '), lowercase=False)
         tfidf_cast = TfidfVectorizer(tokenizer=lambda x: x.split(', '), lowercase=False)
@@ -61,7 +71,7 @@ class HybridRecommender:
         self.matrices = {
             'combined': tfidf_combined.fit_transform(self.df['combined_text']),
             'genre': tfidf_genre.fit_transform(self.df['listed_in']),
-            'cast': tfidf_cast.fit_transform(self.df['cast']),
+            'cast': tfidf_cast.fit_transform(self.df['cast_clean']),
             'cat': csr_matrix(OneHotEncoder(handle_unknown='ignore', sparse_output=True)
                               .fit_transform(self.df[['type', 'country', 'rating']])),
             'num': csr_matrix(StandardScaler().fit_transform(self.df[['release_year', 'duration_mins']]))
@@ -95,7 +105,7 @@ class HybridRecommender:
                 "country": self.df.iloc[i]['country'],
                 "rating": self.df.iloc[i]['rating'],
                 "listed_in": self.df.iloc[i]['listed_in'],
-                "description": self.df.iloc[i]['description'],  # Include description here
+                "description": self.df.iloc[i]['description'],
                 "explanation": self.explain_recommendation(self.df.iloc[idx]['title'], self.df.iloc[i]['title']),
                 "similarity": f"{combined_sim[i]:.2f}"
             })
@@ -130,10 +140,7 @@ class HybridRecommender:
 
     @staticmethod
     def _get_director_match(base_director: str, rec_director: str) -> str:
-        """
-        Überprüft, ob die Regisseure übereinstimmen.
-        """
-        if base_director == "Unknown" or rec_director == "Unknown":
+        if "unknown" in base_director.lower() or "unknown" in rec_director.lower():
             return "No (Unknown Director)"
         return "Yes" if base_director == rec_director else "No"
 
