@@ -7,39 +7,51 @@ app = Flask(__name__)
 # Modell laden
 with open('light_model.pkl', 'rb') as f:
     df, tfidf, indices = pickle.load(f)
+print(df[['combined_features']].head())
 
-def recommend_movies(title, language=None, min_year=None, min_rating=None, top_n=10):
+def get_director(crew_list):
+    if isinstance(crew_list, list):
+        for m in crew_list:
+            if isinstance(m, dict) and m.get('job') == 'Director':
+                return m.get('name', '')
+    return ''
+
+def recommend_movies(title, top_n=10):
     title = title.lower().strip()
     if title not in indices:
         return []
 
+    # Index des eingegebenen Titels abrufen
     idx = indices[title]
+
+    # Ähnlichkeitsberechnung
     input_vector = tfidf.transform([df.loc[idx, 'combined_features']])
     sim_scores = cosine_similarity(input_vector, tfidf.transform(df['combined_features']))[0]
     df['sim_score'] = sim_scores
 
-    filtered = df.copy()
-    if language:
-        filtered = filtered[filtered.get('original_language', '').str.lower() == language.lower()]
-    if min_year:
-        filtered = filtered[filtered.get('release_date', '').str[:4].astype(str) >= str(min_year)]
-    if min_rating:
-        filtered = filtered[filtered.get('vote_average', 0) >= float(min_rating)]
+    # Sortiere nach Ähnlichkeit
+    filtered = df.sort_values(by='sim_score', ascending=False)
+    similar_movies = filtered[filtered.index != idx].head(top_n)
 
-    filtered = filtered.sort_values(by='sim_score', ascending=False)
-    return filtered[filtered.index != idx]['title'].head(top_n).tolist()
+    # Ergebnisse aufbereiten
+    results = []
+    for _, row in similar_movies.iterrows():
+        results.append({
+            'title': row['title'],
+            'overview': row.get('overview', 'Keine Beschreibung vorhanden')[:300] + "...",
+            'genres': row.get('genres', 'Keine Genres vorhanden'),
+            'cast': row.get('cast', 'Keine Cast-Informationen vorhanden'),
+            'director': row.get('director', 'Kein Regisseur vorhanden')
+        })
+    return results
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
     recommendations = []
     if request.method == 'POST':
         movie_title = request.form['movie_title']
-        language = request.form.get('language')
-        min_year = request.form.get('min_year')
-        min_rating = request.form.get('min_rating')
-        recommendations = recommend_movies(movie_title, language, min_year, min_rating)
-    return render_template('index.html', recommendations=recommendations)
-
+        recommendations = recommend_movies(movie_title)
+    return render_template("index.html", recommendations=recommendations)
 @app.route('/titles')
 def titles():
     title_list = df['title'].dropna().tolist()
