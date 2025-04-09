@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="de">
+
 <head>
     <meta charset="UTF-8">
     <title>🎬 Movie Recommender</title>
@@ -7,71 +8,97 @@
     <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </head>
+
 <body class="bg-light">
 
-<nav class="navbar navbar-dark bg-dark mb-4">
-    <div class="container-fluid">
-        <span class="navbar-brand mb-0 h1">🎥 Movie Recommender</span>
-    </div>
-</nav>
-
-<div class="container">
-    <!-- Eingabeformular -->
-    <div class="card shadow-sm p-4 mb-4">
-        <form method="POST">
-            <div class="mb-3">
-                <label for="movie_title" class="form-label">Filmtitel</label>
-                <input type="text" class="form-control" id="movie_title" name="movie_title" autocomplete="off" placeholder="z. B. Inception" required>
-            </div>
-            <div class="row">
-                <div class="col-md-4 mb-3">
-                    <label class="form-label">Sprache</label>
-                    <input type="text" class="form-control" name="language" placeholder="z. B. en, de">
-                </div>
-                <div class="col-md-4 mb-3">
-                    <label class="form-label">Min. Jahr</label>
-                    <input type="number" class="form-control" name="min_year" min="1900" max="2025">
-                </div>
-                <div class="col-md-4 mb-3">
-                    <label class="form-label">Min. Bewertung</label>
-                    <input type="number" class="form-control" name="min_rating" min="0" max="10" step="0.1">
-                </div>
-            </div>
-            <button type="submit" class="btn btn-primary">Empfehlen</button>
-        </form>
-    </div>
-
-    <!-- Empfehlungen -->
-    {% if recommendations %}
-    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-        {% for movie in recommendations %}
-        <div class="col">
-            <div class="card h-100 shadow-sm">
-                <div class="card-body">
-                    <h5 class="card-title">{{ movie.title }}</h5>
-                    {% if movie.genres %}
-                        <h6 class="card-subtitle mb-2 text-muted">🎬 {{ movie.genres }}</h6>
-                    {% endif %}
-                    {% if movie.overview %}
-                        <p class="card-text">{{ movie.overview }}</p>
-                    {% endif %}
-                </div>
-                <ul class="list-group list-group-flush">
-                    {% if movie.cast %}
-                        <li class="list-group-item"><strong>Cast:</strong> {{ movie.cast }}</li>
-                    {% endif %}
-                    {% if movie.director %}
-                        <li class="list-group-item"><strong>Regisseur:</strong> {{ movie.director }}</li>
-                    {% endif %}
-                </ul>
-            </div>
+    <nav class="navbar navbar-dark bg-dark mb-4">
+        <div class="container-fluid">
+            <span class="navbar-brand mb-0 h1">🎥 Movie Recommender</span>
         </div>
-        {% endfor %}
-    </div>
-    {% endif %}
-</div>
+    </nav>
 
-<script src="{{ url_for('static', filename='script.js') }}"></script>
+    <div class="container">
+        <!-- Eingabeformular -->
+        <div class="card shadow-sm p-4 mb-4">
+            <form method="POST">
+                <div class="mb-3">
+                    <label for="movie_title" class="form-label">Filmtitel</label>
+                    <input type="text" class="form-control" id="movie_title" name="movie_title" autocomplete="off"
+                        placeholder="z. B. Inception" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Empfehlen</button>
+            </form>
+        </div>
+
+        <!-- Empfehlungen -->
+        {% if recommendations %}
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            {% for movie in recommendations %}
+            <div class="col">
+                <div class="card h-100 shadow-sm" data-bs-toggle="modal" data-bs-target="#modal-{{ loop.index }}">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ movie.title }}</h5>
+                        {% if movie.genres %}
+                        <h6 class="card-subtitle mb-2 text-muted">🎬 {{ movie.genres }}</h6>
+                        {% endif %}
+                        {% if movie.director %}
+                        <p class="card-text"><strong>Regisseur:</strong> {{ movie.director }}</p>
+                        <!-- Director über Cast -->
+                        {% endif %}
+                        {% if movie.cast %}
+                        <p class="card-text"><strong>Cast:</strong> {{ movie.cast }}</p> <!-- Cast über Overview -->
+                        {% endif %}
+                        {% if movie.production_countries %}
+                        <p class="card-text"><strong>Produktionsländer:</strong> {{ movie.production_countries }}</p>
+                        {% endif %}
+                        {% if movie.production_companies %}
+                        <p class="card-text"><strong>Produktionsfirmen:</strong> {{ movie.production_companies }}</p>
+                        {% endif %}
+                        {% if movie.release_date %}
+                        <p class="card-text"><strong>Veröffentlichungsdatum:</strong> {{ movie.release_date }}</p>
+                        {% endif %}
+                        {% if movie.vote_average %}
+                        <p class="card-text"><strong>Bewertung:</strong> {{ movie.vote_average }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal für vollständigen Overview -->
+            <div class="modal fade" id="modal-{{ loop.index }}" tabindex="-1"
+                aria-labelledby="modalLabel-{{ loop.index }}" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="modalLabel-{{ loop.index }}">{{ movie.title }}</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+    
+                            {% if movie.overview %}
+                            <strong>Overview:</strong>
+                            <p>{{ movie.overview }}</p> 
+                            {% else %}
+                            <p>Keine Beschreibung verfügbar.</p>
+                            {% endif %}
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Schließen</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="alert alert-warning text-center" role="alert">
+            Keine Empfehlungen gefunden. Bitte versuchen Sie es mit einem anderen Titel.
+        </div>
+        {% endif %}
+    </div>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
+
 </html>

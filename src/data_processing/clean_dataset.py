@@ -17,7 +17,8 @@ keywords_df['id'] = keywords_df['id'].astype(int)
 df = movies_df.merge(credits_df, on='id').merge(keywords_df, on='id')
 
 # 🔹 4. Nur relevante Spalten
-df = df[['id', 'title', 'overview', 'tagline', 'genres', 'keywords', 'cast', 'crew']]
+df = df[['id', 'title', 'overview', 'tagline', 'genres', 'keywords', 'cast', 'crew', 
+         'production_countries', 'production_companies', 'release_date', 'vote_average']]
 
 # 🔹 5. Parser für List-of-Dict-Spalten
 def parse_column(val):
@@ -26,12 +27,12 @@ def parse_column(val):
     except:
         return []
 
-for col in ['genres', 'keywords', 'cast', 'crew']:
+for col in ['genres', 'keywords', 'cast', 'crew', 'production_countries', 'production_companies']:
     df[col] = df[col].apply(parse_column)
 
 # 🔹 6. Helferfunktionen
 def get_names(obj_list, key='name', max_items=5):
-    return ' '.join([obj[key].replace(' ', '') for obj in obj_list[:max_items] if key in obj])
+    return ', '.join([obj[key].replace(' ', ' ') for obj in obj_list[:max_items] if key in obj])
 
 def get_director(crew_list):
     for member in crew_list:
@@ -71,8 +72,14 @@ duplicates_removed = initial_count - len(df)
 # 🔹 9. Titel vereinheitlichen (lowercase für späteres Mapping)
 df['title'] = df['title'].str.strip()
 
+# 🔹 10. Zusätzliche Felder bereinigen
+df['production_countries'] = df['production_countries'].apply(lambda x: get_names(x))
+df['production_companies'] = df['production_companies'].apply(lambda x: get_names(x))
+df['release_date'] = pd.to_datetime(df['release_date'], errors='coerce').dt.strftime('%Y-%m-%d')
+df['vote_average'] = pd.to_numeric(df['vote_average'], errors='coerce').fillna(0)
+
 # Vorschau
-print(df[['title', 'combined_features']].head())
+print(df[['title', 'combined_features', 'production_countries', 'production_companies', 'release_date', 'vote_average']].head())
 
 # Logging der Bereinigungsschritte
 print(f"🔍 Anzahl der entfernten Einträge:")
@@ -80,12 +87,12 @@ print(f"- Fehlende Werte (Titel oder Features): {missing_values_removed}")
 print(f"- Leere kombinierte Features: {empty_features_removed}")
 print(f"- Duplikate: {duplicates_removed}")
 
-# 🔹 10. Verbindung zu MongoDB Atlas
+# 🔹 11. Verbindung zu MongoDB Atlas
 client = MongoClient('mongodb+srv://user:user@movierecommendation.2y0pw.mongodb.net/?retryWrites=true&w=majority&appName=MovieRecommendation')
 db = client['netflix_db']
 collection = db['recommendation_data']
 
-# 🔹 11. Collection leeren und Daten hochladen
+# 🔹 12. Collection leeren und Daten hochladen
 collection.delete_many({})
 collection.insert_many(df.to_dict(orient='records'))
 
