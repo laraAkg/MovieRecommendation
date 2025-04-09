@@ -10,7 +10,7 @@ def explain_recommendation(base_movie, recommended_movie):
         explanation['genres'] = {
             'shared': list(genre_overlap),
             'count': len(genre_overlap),
-            'details': f"Shared genres: {', '.join(genre_overlap)}"
+            'details': f"{', '.join(genre_overlap)}"
         }
 
     # Compare cast
@@ -21,14 +21,14 @@ def explain_recommendation(base_movie, recommended_movie):
         explanation['cast'] = {
             'shared': list(cast_overlap),
             'count': len(cast_overlap),
-            'details': f"Shared cast members: {', '.join(cast_overlap)}"
+            'details': f"{', '.join(cast_overlap)}"
         }
 
     # Compare director
     if base_movie.get('director') == recommended_movie.get('director'):
         explanation['director'] = {
             'shared': base_movie.get('director'),
-            'details': f"Same director: {base_movie.get('director')}"
+            'details': f"{base_movie.get('director')}"
         }
 
     # Compare keywords
@@ -39,7 +39,7 @@ def explain_recommendation(base_movie, recommended_movie):
         explanation['keywords'] = {
             'shared': list(keyword_overlap),
             'count': len(keyword_overlap),
-            'details': f"Shared keywords: {', '.join(keyword_overlap)}"
+            'details': f"{', '.join(keyword_overlap)}"
         }
 
     # Compare tagline
@@ -48,13 +48,14 @@ def explain_recommendation(base_movie, recommended_movie):
     if base_tagline and recommended_tagline and base_tagline == recommended_tagline:
         explanation['tagline'] = {
             'shared': base_tagline,
-            'details': f"Shared tagline: {base_tagline}"
+            'details': f"{base_tagline}"
         }
 
     # Add similarity score
     explanation['similarity_score'] = {
         'score': recommended_movie.get('sim_score', 0),
-        'details': f"Similarity score: {recommended_movie.get('sim_score', 0):.2f}"
+        'details': f"{recommended_movie.get('sim_score', 0):.2f}"
     }
 
+    print(f"Explanation for {recommended_movie.get('title', '')}: {explanation}")
     return explanation

@@ -45,10 +45,9 @@
                         {% endif %}
                         {% if movie.director %}
                         <p class="card-text"><strong>Regisseur:</strong> {{ movie.director }}</p>
-                        <!-- Director über Cast -->
                         {% endif %}
                         {% if movie.cast %}
-                        <p class="card-text"><strong>Cast:</strong> {{ movie.cast }}</p> <!-- Cast über Overview -->
+                        <p class="card-text"><strong>Cast:</strong> {{ movie.cast }}</p>
                         {% endif %}
                         {% if movie.production_countries %}
                         <p class="card-text"><strong>Produktionsländer:</strong> {{ movie.production_countries }}</p>
@@ -61,6 +60,25 @@
                         {% endif %}
                         {% if movie.vote_average %}
                         <p class="card-text"><strong>Bewertung:</strong> {{ movie.vote_average }}</p>
+                        {% endif %}
+                        {% if movie.explanation %}
+                        <p><strong>Explanation:</strong></p>
+                        <ul>
+                            {% if movie.explanation.genres %}
+                            <li><strong>Shared Genres:</strong> {{ movie.explanation.genres.details }}</li>
+                            {% endif %}
+                            {% if movie.explanation.cast %}
+                            <li><strong>Shared Cast Members:</strong> {{ movie.explanation.cast.details }}</li>
+                            {% endif %}
+                            {% if movie.explanation.director %}
+                            <li><strong>Same Director:</strong> {{ movie.explanation.director.details }}</li>
+                            {% endif %}
+                            {% if movie.explanation.similarity_score %}
+                            <li><strong>Similarity Score:</strong> {{ movie.explanation.similarity_score.details }}</li>
+                            {% endif %}
+                        </ul>
+                        {% else %}
+                        <p><strong>Explanation:</strong> No explanation available.</p>
                         {% endif %}
                     </div>
                 </div>
@@ -76,10 +94,9 @@
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
-    
                             {% if movie.overview %}
                             <strong>Overview:</strong>
-                            <p>{{ movie.overview }}</p> 
+                            <p>{{ movie.overview }}</p>
                             {% else %}
                             <p>Keine Beschreibung verfügbar.</p>
                             {% endif %}
