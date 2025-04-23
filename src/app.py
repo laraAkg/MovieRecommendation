@@ -14,9 +14,9 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
-app.secret_key = "dein-geheimes-key"  # nötig für flash()
+app.secret_key = "PyTH0N_Fl4sk_SeCrEt_K3y"
 
-# --- Modell laden + Cache wie gehabt ---
+# --- Load model + cache setup ---
 with open('created_model/light_model.pkl', 'rb') as f:
     df, tfidf_vectorizer, indices = pickle.load(f)
 tfidf_matrix = tfidf_vectorizer.transform(df['combined_features'])
@@ -31,23 +31,23 @@ def cached_recommend(title: str):
         indices=indices
     )
 
-# --- Routen ---
+# --- Routes ---
 @app.route('/', methods=['GET', 'POST'])
 def index():
     recommendations = []
     if request.method == 'POST':
         movie_title = request.form.get('movie_title', '').strip()
-        logger.info(f"User hat angefragt: {movie_title!r}")
+        logger.info(f"User requested: {movie_title!r}")
         try:
             recommendations = cached_recommend(movie_title)
         except ValueError as e:
-            # Bekannte Fehler (Titel nicht gefunden)
-            logger.warning(f"Fehler bei Eingabetitel: {e}")
+            # Known errors (title not found)
+            logger.warning(f"Error with input title: {e}")
             flash(str(e), category="warning")
         except Exception as e:
-            # Unvorhergesehener Fehler
-            logger.exception("Unerwarteter Fehler in index()")
-            flash("Ein interner Fehler ist aufgetreten. Bitte versuche es später erneut.", category="danger")
+            # Unexpected error
+            logger.exception("Unexpected error in index()")
+            flash("An internal error occurred. Please try again later.", category="danger")
 
     return render_template(
         "index.html",
@@ -56,12 +56,12 @@ def index():
 
 @app.errorhandler(404)
 def page_not_found(e):
-    logger.warning(f"404 aufgerufen: {request.path}")
+    logger.warning(f"404 triggered: {request.path}")
     return render_template("404.html"), 404
 
 @app.errorhandler(500)
 def internal_error(e):
-    # Logger.exception druckt Stack-Trace
+    # Logger.exception prints the stack trace
     logger.exception("500 Internal Server Error")
     return render_template("500.html"), 500
 
@@ -70,6 +70,6 @@ def titles():
     return jsonify(df['title'].dropna().tolist())
 
 if __name__ == '__main__':
-    # Setze Flask-eigenes Logging etwas leiser
+    # Reduce verbosity of Flask's built-in logging
     logging.getLogger('werkzeug').setLevel(logging.WARNING)
     app.run(debug=True)

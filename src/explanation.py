@@ -3,7 +3,50 @@ import logging
 logger = logging.getLogger(__name__)
 
 def explain_recommendation(base_movie, recommended_movie):
-    """Generate an explanation for why a movie was recommended."""
+    """
+    Generate an explanation for why a recommended movie was suggested based on its similarity
+    to a base movie. The explanation includes comparisons of genres, cast, director, keywords,
+    tagline, and a similarity score.
+    Args:
+        base_movie (dict): A dictionary containing details of the base movie. Expected keys include:
+            - 'genres' (str): A space-separated string of genres.
+            - 'cast' (str): A comma-separated string of cast members.
+            - 'director' (str): The name of the director.
+            - 'keywords' (str): A space-separated string of keywords.
+            - 'tagline' (str): The tagline of the movie.
+        recommended_movie (dict): A dictionary containing details of the recommended movie. Expected keys include:
+            - 'genres' (str): A space-separated string of genres.
+            - 'cast' (str): A comma-separated string of cast members.
+            - 'director' (str): The name of the director.
+            - 'keywords' (str): A space-separated string of keywords.
+            - 'tagline' (str): The tagline of the movie.
+            - 'sim_score' (float): A similarity score between the base and recommended movie.
+    Returns:
+        dict: A dictionary containing the explanation for the recommendation. Possible keys include:
+            - 'genres': A dictionary with shared genres, their count, and details.
+            - 'cast': A dictionary with shared cast members, their count, and details.
+            - 'director': A dictionary with the shared director and details.
+            - 'keywords': A dictionary with shared keywords, their count, and details.
+            - 'tagline': A dictionary with the shared tagline and details.
+            - 'similarity_score': A dictionary with the similarity score and details.
+    Logs:
+        Logs the explanation for the recommended movie using the logger.
+    Example:
+        base_movie = {
+            'genres': 'Action Adventure',
+            'cast': 'Actor A, Actor B',
+            'director': 'Director X',
+            'keywords': 'hero villain',
+            'tagline': 'An epic journey'
+        recommended_movie = {
+            'genres': 'Action Sci-Fi',
+            'cast': 'Actor A, Actor C',
+            'director': 'Director X',
+            'keywords': 'hero space',
+            'tagline': 'An epic journey',
+            'sim_score': 0.85
+        explanation = explain_recommendation(base_movie, recommended_movie)
+    """
     explanation = {}
 
     # Compare genres
