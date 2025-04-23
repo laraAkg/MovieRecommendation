@@ -1,3 +1,7 @@
+import logging
+
+logger = logging.getLogger(__name__)
+
 def explain_recommendation(base_movie, recommended_movie):
     """Generate an explanation for why a movie was recommended."""
     explanation = {}
@@ -57,5 +61,5 @@ def explain_recommendation(base_movie, recommended_movie):
         'details': f"{recommended_movie.get('sim_score', 0):.2f}"
     }
 
-    print(f"Explanation for {recommended_movie.get('title', '')}: {explanation}")
+    logger.info(f"Explanation for {recommended_movie.get('title', '')}: {explanation}")
     return explanation
