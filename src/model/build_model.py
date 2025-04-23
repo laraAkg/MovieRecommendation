@@ -5,15 +5,12 @@ import logging
 from pymongo import MongoClient
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.preprocessing import MinMaxScaler
+import os
+from dotenv import load_dotenv
 
 # Configure logger
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
-
-# MongoDB connection
-MONGO_URI = 'mongodb+srv://user:user@movierecommendation.2y0pw.mongodb.net/?retryWrites=true&w=majority&appName=MovieRecommendation'
-DB_NAME = 'netflix_db'
-COLLECTION_NAME = 'recommendation_data'
 
 def connect_to_mongodb(uri, db_name, collection_name):
     """Connect to MongoDB and return the collection."""
@@ -84,7 +81,7 @@ def save_model(filename, df_reduced, tfidf, indices):
 # Main workflow
 if __name__ == "__main__":
     # Connect to MongoDB
-    collection = connect_to_mongodb(MONGO_URI, DB_NAME, COLLECTION_NAME)
+    collection = connect_to_mongodb(os.getenv("MONGO_URI"), os.getenv("DB_NAME"), os.getenv("COLLECTION_NAME"))
 
     # Load data
     df = load_data_from_mongodb(collection)
@@ -115,4 +112,6 @@ if __name__ == "__main__":
                      'vote_count_normalized', 'combined_features']]
 
     # Save the model
-    save_model('light_model.pkl', df_reduced, tfidf, indices)
+    model_dir = 'created_model'
+    os.makedirs(model_dir, exist_ok=True)
+    save_model('created_model/light_model.pkl', df_reduced, tfidf, indices)

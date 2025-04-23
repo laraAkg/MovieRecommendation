@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
@@ -20,20 +20,19 @@
     </nav>
 
     <div class="container">
-        <!-- Eingabeformular -->
+        <!-- Input Form -->
         <div class="card shadow-sm p-4 mb-4">
             <form method="POST">
                 <div class="mb-3">
-                    <label for="movie_title" class="form-label">Filmtitel</label>
+                    <label for="movie_title" class="form-label">Movie Title</label>
                     <input type="text" class="form-control" id="movie_title" name="movie_title" autocomplete="off"
-                        placeholder="z. B. Inception" required>
+                        placeholder="e.g., Inception" required>
                 </div>
-                <button type="submit" class="btn btn-primary">Empfehlen</button>
+                <button type="submit" class="btn btn-primary">Recommend</button>
             </form>
         </div>
 
-        <!-- Empfehlungen -->
-        {% if recommendations %}
+        <!-- Recommendations -->
         <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
             {% for movie in recommendations %}
             <div class="col">
@@ -44,22 +43,22 @@
                         <h6 class="card-subtitle mb-2 text-muted">🎬 {{ movie.genres }}</h6>
                         {% endif %}
                         {% if movie.director %}
-                        <p class="card-text"><strong>Regisseur:</strong> {{ movie.director }}</p>
+                        <p class="card-text"><strong>Director:</strong> {{ movie.director }}</p>
                         {% endif %}
                         {% if movie.cast %}
                         <p class="card-text"><strong>Cast:</strong> {{ movie.cast }}</p>
                         {% endif %}
                         {% if movie.production_countries %}
-                        <p class="card-text"><strong>Produktionsländer:</strong> {{ movie.production_countries }}</p>
+                        <p class="card-text"><strong>Production Countries:</strong> {{ movie.production_countries }}</p>
                         {% endif %}
                         {% if movie.production_companies %}
-                        <p class="card-text"><strong>Produktionsfirmen:</strong> {{ movie.production_companies }}</p>
+                        <p class="card-text"><strong>Production Companies:</strong> {{ movie.production_companies }}</p>
                         {% endif %}
                         {% if movie.release_date %}
-                        <p class="card-text"><strong>Veröffentlichungsdatum:</strong> {{ movie.release_date }}</p>
+                        <p class="card-text"><strong>Release Date:</strong> {{ movie.release_date }}</p>
                         {% endif %}
                         {% if movie.vote_average %}
-                        <p class="card-text"><strong>Bewertung:</strong> {{ movie.vote_average }}</p>
+                        <p class="card-text"><strong>Rating:</strong> {{ movie.vote_average }}</p>
                         {% endif %}
                         {% if movie.explanation %}
                         <p><strong>Explanation:</strong></p>
@@ -84,7 +83,7 @@
                 </div>
             </div>
 
-            <!-- Modal für vollständigen Overview -->
+            <!-- Modal for full Overview -->
             <div class="modal fade" id="modal-{{ loop.index }}" tabindex="-1"
                 aria-labelledby="modalLabel-{{ loop.index }}" aria-hidden="true">
                 <div class="modal-dialog">
@@ -98,22 +97,17 @@
                             <strong>Overview:</strong>
                             <p>{{ movie.overview }}</p>
                             {% else %}
-                            <p>Keine Beschreibung verfügbar.</p>
+                            <p>No description available.</p>
                             {% endif %}
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Schließen</button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                         </div>
                     </div>
                 </div>
             </div>
             {% endfor %}
         </div>
-        {% else %}
-        <div class="alert alert-warning text-center" role="alert">
-            Keine Empfehlungen gefunden. Bitte versuchen Sie es mit einem anderen Titel.
-        </div>
-        {% endif %}
     </div>
     <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>

@@ -6,7 +6,7 @@ from recommendation import recommend_movies  # aus recommendation.py
 app = Flask(__name__)
 
 # Modell laden
-with open('light_model.pkl', 'rb') as f:
+with open('created_model/light_model.pkl', 'rb') as f:
     df, tfidf, indices = pickle.load(f)
 
 @app.route('/', methods=['GET', 'POST'])
