@@ -3,7 +3,11 @@ from flask import Flask, render_template, request, jsonify, flash
 import pickle
 from functools import lru_cache
 from recommendation import recommend_movies
+import os
+from dotenv import load_dotenv
 
+# Load environment variables from .env file
+load_dotenv()
 # --- Logging setup ---
 logging.basicConfig(
     level=logging.INFO,
@@ -13,7 +17,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
-app.secret_key = "PyTH0N_Fl4sk_SeCrEt_K3y"
+app.secret_key = os.getenv("SECRET_KEY")
 
 # --- Load model + cache setup ---
 with open("created_model/light_model.pkl", "rb") as f:

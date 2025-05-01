@@ -63,7 +63,7 @@ MovieRecommendation/
 ├── created_model/            # created .pkl model
 │   └── light_model.pkl
 │
-├── .env.example              # env template (MONGO_URI, FLASK_ENV, SECRET_KEY)
+├── .env.example              # env template (MONGO_URI, DB_NAME, COLLECTION_NAME, SECRET_KEY)
 ├── requirements.txt          # Required dependencies
 └── README.md                
 
@@ -99,6 +99,15 @@ MovieRecommendation/
      ```
      MONGO_URI=mongodb://localhost:27017/movies
      ```
+
+5. **Dataset Setup**:
+
+Due to file size limits on GitHub, the raw CSVs are not included in this repository. Please download the following files from Kaggle and place them into the `data/` folder before running the pipeline:
+
+1. [movies_metadata.csv](https://www.kaggle.com/datasets/rounakbanik/the-movies-dataset?select=movies_metadata.csv)  
+2. [credits.csv](https://www.kaggle.com/datasets/rounakbanik/the-movies-dataset?select=credits.csv)  
+3. [keywords.csv](https://www.kaggle.com/datasets/rounakbanik/the-movies-dataset?select=keywords.csv)  
+
 ---
 
 ## Running the Project
@@ -118,6 +127,9 @@ MovieRecommendation/
    python src/main/app.py
    ```  
 
+4. **Open the Application**  
+   Once the Flask API is running, open your browser and navigate to [http://127.0.0.1:5000/](http://127.0.0.1:5000/) to access the application.
+
 ---
 
 ## 📊 API Usage
@@ -127,25 +139,6 @@ MovieRecommendation/
   - **URL**: `/`
   - **Method**: `POST`
   - **Description**: Submits a movie title to fetch recommendations. Handles errors gracefully and provides a list of similar movies with their similarity scores.
-
-### View All Movie Titles
-
-3. **Get All Movie Titles**  
-  - **URL**: `/titles`
-  - **Method**: `GET`
-  - **Description**: Fetches a list of all movie titles stored in the MongoDB database, sorted alphabetically.
-  - **Response**:
-    ```json
-    {
-      "titles": [
-      "12 Angry Men",
-      "A Beautiful Mind",
-      "Avatar",
-      "Inception",
-      "The Dark Knight"
-      ]
-    }
-    ```
 
 ---
 
