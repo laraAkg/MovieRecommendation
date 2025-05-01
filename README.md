@@ -55,10 +55,10 @@ MovieRecommendation/
 │           ├── 404.html
 │           └── 500.html
 │
-├── data/                     # for version-controlled small data or pointers
-│   ├── raw/                  # raw CSVs (not in git—add in .gitignore)
-│   ├── processed/            # processed artifacts
-│   └── preprocess.py         # helper to move raw→processed
+├── data/                     # raw CSVs
+│   ├── credits.csv                  
+│   ├── keywords.csv            
+│   └── movies_metadata.csv         
 │
 ├── created_model/            # created .pkl model
 │   └── light_model.pkl
@@ -91,9 +91,9 @@ MovieRecommendation/
    ```
 
 4. **Configure environment variables**:
-   - Copy `.env.example` to `.env`:
+   - Copy `.env_example` to `.env`:
      ```bash
-     cp .env.example .env
+     cp .env_example .env
      ```
    - Update `.env` with your MongoDB URI:
      ```
@@ -124,48 +124,28 @@ MovieRecommendation/
 
 ### Endpoints
 1. **Get Recommendations**  
-   - **URL**: `/recommend`
-   - **Method**: `POST`
-   - **Request Body**:
-     ```json
-     {
-       "movie_title": "Inception",
-       "top_n": 5
-     }
-     ```
-   - **Response**:
-     ```json
-     {
-       "recommendations": [
-         {"title": "Interstellar", "similarity_score": 0.85},
-         {"title": "The Prestige", "similarity_score": 0.78}
-       ]
-     }
-     ```
+  - **URL**: `/`
+  - **Method**: `POST`
+  - **Description**: Submits a movie title to fetch recommendations. Handles errors gracefully and provides a list of similar movies with their similarity scores.
 
-2. **Get Explanation**  
-   - **URL**: `/explain`
-   - **Method**: `POST`
-   - **Request Body**:
-     ```json
-     {
-       "movie_title": "Inception",
-       "recommended_title": "Interstellar"
-     }
-     ```
-   - **Response**:
-     ```json
-     {
-       "explanation": "Both movies share themes of science fiction and exploration."
-     }
-     ```
+### View All Movie Titles
 
-### Example Call
-```bash
-curl -X POST http://127.0.0.1:5000/recommend \
--H "Content-Type: application/json" \
--d '{"movie_title": "Inception", "top_n": 5}'
-```
+3. **Get All Movie Titles**  
+  - **URL**: `/titles`
+  - **Method**: `GET`
+  - **Description**: Fetches a list of all movie titles stored in the MongoDB database, sorted alphabetically.
+  - **Response**:
+    ```json
+    {
+      "titles": [
+      "12 Angry Men",
+      "A Beautiful Mind",
+      "Avatar",
+      "Inception",
+      "The Dark Knight"
+      ]
+    }
+    ```
 
 ---
 
@@ -176,7 +156,7 @@ curl -X POST http://127.0.0.1:5000/recommend \
 
 ### Reproducibility Steps
 1. Ensure all dependencies are installed using `requirements.txt`.
-2. Use the provided `.env.example` to configure your environment.
+2. Use the provided `.env_example` to configure your environment.
 3. Follow the installation steps to preprocess data, train the model, and start the API.
 
 ---
@@ -201,4 +181,17 @@ curl -X POST http://127.0.0.1:5000/recommend \
 - **Flask**: [Flask Documentation](https://flask.palletsprojects.com/)
 - **MongoDB**: [MongoDB Documentation](https://www.mongodb.com/docs/)
 
-![Screenshot](./path/to/screenshot.png)
+---
+## Screenshots
+
+### Movie recommender
+![Movie recommender](images/Movie_recommender.png)
+
+### Recommendation Example
+![Recommendation example](images/Movie_detail.png)
+
+### Movie detail
+![Movie detail](images/Movie_detail.png)
+
+### Error message
+![Error message](images/Error_msg.png)

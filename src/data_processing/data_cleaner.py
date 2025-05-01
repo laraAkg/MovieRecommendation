@@ -104,14 +104,14 @@ class DataCleaner:
         # Clean data
         df.dropna(subset=['title', 'combined_features'], inplace=True)
         df = df[df['combined_features'].str.strip() != '']
-        df.drop_duplicates(subset='title', inplace=True)
-
+        df = df.drop_duplicates(subset='title', inplace=False)
+        
         # Normalize titles and clean additional fields
-        df['title'] = df['title'].str.strip()
-        df['production_countries'] = df['production_countries'].apply(lambda x: DataCleaner.get_names(x))
-        df['production_companies'] = df['production_companies'].apply(lambda x: DataCleaner.get_names(x))
-        df['release_date'] = pd.to_datetime(df['release_date'], errors='coerce').dt.strftime('%Y-%m-%d')
-        df['vote_average'] = pd.to_numeric(df['vote_average'], errors='coerce').fillna(0)
+        df.loc[:, 'title'] = df['title'].str.strip()
+        df.loc[:, 'production_countries'] = df['production_countries'].apply(lambda x: DataCleaner.get_names(x))
+        df.loc[:, 'production_companies'] = df['production_companies'].apply(lambda x: DataCleaner.get_names(x))
+        df.loc[:, 'release_date'] = pd.to_datetime(df['release_date'], errors='coerce').dt.strftime('%Y-%m-%d')
+        df.loc[:, 'vote_average'] = pd.to_numeric(df['vote_average'], errors='coerce').fillna(0)
 
         # Remove unwanted columns
         columns_to_drop = [

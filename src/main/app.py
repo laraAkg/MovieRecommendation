@@ -80,9 +80,9 @@ def internal_error(e):
     return render_template("500.html"), 500
 
 
-@app.route("/titles")
+@app.route("/titles", methods=["GET"])
 def titles():
-    return jsonify(df["title"].dropna().tolist())
+    return jsonify(df["title"].tolist())
 
 
 if __name__ == "__main__":

@@ -40,7 +40,7 @@ def recommend_movies(
     """
     key = title.lower().strip()
     if key not in indices:
-        raise ValueError(f"Titel '{title}' wurde nicht gefunden.")
+        raise ValueError(f"Title '{title}' was not found.")
 
     idx = indices[key]
     input_vec = tfidf_matrix[idx]
