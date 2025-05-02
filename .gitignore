@@ -98,5 +98,3 @@ $RECYCLE.BIN/
 *.~lock.*
 *.sublime-workspace
 *.sublime-project
-
-*.csv
