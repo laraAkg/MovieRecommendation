@@ -7,6 +7,7 @@ import os
 from recommendation import get_recommendations_knn
 from dotenv import load_dotenv
 
+
 # Load environment variables from .env file
 load_dotenv()
 # --- Logging setup ---
@@ -22,14 +23,14 @@ app.secret_key = os.getenv("SECRET_KEY")
 
 # --- Load model + cache setup ---
 with open("created_model/light_model.pkl", "rb") as f:
-    df, tfidf_vectorizer, indices = pickle.load(f)
-tfidf_matrix = tfidf_vectorizer.transform(df["combined_features"])
-
+    df, tfidf_vectorizer, indices, tfidf_matrix = pickle.load(f)
+    
 # Load k-NN model
 with open("created_model/knn_model.pkl", "rb") as f:
     knn_model = pickle.load(f)
 
 CACHE_SIZE = 128
+
 @lru_cache(maxsize=CACHE_SIZE)
 def cached_recommend_knn(title: str):
     """
@@ -37,12 +38,12 @@ def cached_recommend_knn(title: str):
     Args:
         title (str): The title of the movie for which recommendations are needed.
     Returns:
-        list: A list of recommended movie titles.
+        list: A list of recommended movie titles with explanations.
     """
-    from recommendation import get_recommendations_knn  # Import the k-NN recommendation function
-    return get_recommendations_knn(
+    return  get_recommendations_knn(
         title=title, knn_model=knn_model, tfidf_matrix=tfidf_matrix, df=df, indices=indices
     )
+  
 
 @lru_cache(maxsize=CACHE_SIZE)
 def cached_recommend(title: str):
