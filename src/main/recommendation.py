@@ -71,3 +71,45 @@ def recommend_movies(
         )
 
     return recommendations
+
+def get_recommendations_knn(title, knn_model, tfidf_matrix, df, indices, top_n=10):
+    """
+    Generate movie recommendations using the k-NN model.
+    Args:
+        title (str): The title of the movie to base recommendations on.
+        knn_model (NearestNeighbors): The trained k-NN model.
+        tfidf_matrix (scipy.sparse.csr_matrix): The TF-IDF matrix of combined features.
+        df (pandas.DataFrame): The DataFrame containing movie data.
+        indices (pandas.Series): A mapping of movie titles to their indices.
+        top_n (int): The number of recommendations to return.
+    Returns:
+        List[Dict[str, Any]]: A list of dictionaries containing details of recommended movies.
+    """
+    title = title.lower()
+    if title not in indices:
+        raise ValueError(f"Movie '{title}' not found in the dataset.")
+
+    idx = indices[title]
+    distances, neighbors = knn_model.kneighbors(tfidf_matrix[idx], n_neighbors=top_n+1)
+    similar_indices = neighbors.flatten()[1:]  # Exclude the input movie itself
+
+    recommendations = []
+    for i in similar_indices:
+        row = df.iloc[i].to_dict()
+        recommendations.append(
+            {
+                "title": row.get("title", ""),
+                "overview": row.get("overview", ""),
+                "genres": row.get("genres", ""),
+                "cast": row.get("cast", ""),
+                "director": row.get("director", ""),
+                "keywords": row.get("keywords", ""),
+                "tagline": row.get("tagline", ""),
+                "production_countries": row.get("production_countries", ""),
+                "production_companies": row.get("production_companies", ""),
+                "release_date": row.get("release_date", ""),
+                "vote_average": row.get("vote_average", 0.0),
+            }
+        )
+
+    return recommendations

@@ -7,6 +7,8 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.preprocessing import MinMaxScaler
 import os
 from dotenv import load_dotenv
+from sklearn.neighbors import NearestNeighbors
+from sklearn.metrics.pairwise import cosine_similarity
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -52,6 +54,7 @@ def load_data_from_mongodb(collection):
     except Exception as e:
         logger.error(f"Failed to load data from MongoDB: {e}")
         exit(1)
+        
 def safe_get(row, key, default=''):
     """
     Safely retrieves a value from a dictionary-like object, ensuring that the value is not null.
@@ -154,6 +157,79 @@ def save_model(filename, df_reduced, tfidf, indices):
         pickle.dump((df_reduced, tfidf, indices), f)
     logger.info(f"✅ Model successfully saved to {filename}.")
 
+def train_knn_model(tfidf_matrix, n_neighbors=10):
+    """
+    Trains a k-Nearest Neighbors (k-NN) model based on the TF-IDF vectors.
+    Args:
+        tfidf_matrix (scipy.sparse.csr_matrix): The TF-IDF matrix of combined features.
+        n_neighbors (int): The number of neighbors to use for recommendations.
+    Returns:
+        NearestNeighbors: The trained k-NN model.
+    """
+    knn = NearestNeighbors(metric='cosine', algorithm='brute', n_neighbors=n_neighbors)
+    knn.fit(tfidf_matrix)
+    logger.info("✅ k-NN model successfully trained.")
+    return knn
+
+def save_knn_model(filename, knn_model):
+    """
+    Saves the k-NN model to a file.
+    Args:
+        filename (str): The path to the file where the model will be saved.
+        knn_model (NearestNeighbors): The k-NN model to save.
+    Returns:
+        None
+    """
+    with open(filename, 'wb') as f:
+        pickle.dump(knn_model, f)
+    logger.info(f"✅ k-NN model successfully saved to {filename}.")
+
+
+def get_recommendations_tfidf(title, tfidf_matrix, df, indices, top_n=10):
+    """
+    Generate movie recommendations using the TF-IDF model.
+    Args:
+        title (str): The title of the movie to base recommendations on.
+        tfidf_matrix (scipy.sparse.csr_matrix): The TF-IDF matrix of combined features.
+        df (pandas.DataFrame): The DataFrame containing movie data.
+        indices (pandas.Series): A mapping of movie titles to their indices.
+        top_n (int): The number of recommendations to return.
+    Returns:
+        list: A list of recommended movie titles.
+    """
+    title = title.lower()
+    if title not in indices:
+        logger.error(f"Movie '{title}' not found in the dataset.")
+        return []
+
+    idx = indices[title]
+    cosine_sim = cosine_similarity(tfidf_matrix[idx], tfidf_matrix).flatten()
+    similar_indices = cosine_sim.argsort()[-top_n-1:-1][::-1]
+    return df.iloc[similar_indices]['title'].tolist()
+
+def get_recommendations_knn(title, knn_model, tfidf_matrix, df, indices, top_n=10):
+    """
+    Generate movie recommendations using the k-NN model.
+    Args:
+        title (str): The title of the movie to base recommendations on.
+        knn_model (NearestNeighbors): The trained k-NN model.
+        tfidf_matrix (scipy.sparse.csr_matrix): The TF-IDF matrix of combined features.
+        df (pandas.DataFrame): The DataFrame containing movie data.
+        indices (pandas.Series): A mapping of movie titles to their indices.
+        top_n (int): The number of recommendations to return.
+    Returns:
+        list: A list of recommended movie titles.
+    """
+    title = title.lower()
+    if title not in indices:
+        logger.error(f"Movie '{title}' not found in the dataset.")
+        return []
+
+    idx = indices[title]
+    distances, neighbors = knn_model.kneighbors(tfidf_matrix[idx], n_neighbors=top_n+1)
+    similar_indices = neighbors.flatten()[1:]  # Exclude the input movie itself
+    return df.iloc[similar_indices]['title'].tolist()
+
 # Main workflow
 if __name__ == "__main__":
     # Connect to MongoDB
@@ -191,3 +267,20 @@ if __name__ == "__main__":
     model_dir = 'created_model'
     os.makedirs(model_dir, exist_ok=True)
     save_model('created_model/light_model.pkl', df_reduced, tfidf, indices)
+
+    # Train k-NN-Model
+    knn_model = train_knn_model(tfidf_matrix)
+
+    # Save k-NN-Model
+    save_knn_model('created_model/knn_model.pkl', knn_model)
+
+    # Example movie title
+    movie_title = "The Dark Knight"
+
+    # Generate recommendations using TF-IDF
+    tfidf_recommendations = get_recommendations_tfidf(movie_title, tfidf_matrix, df, indices)
+    logger.info(f"TF-IDF Recommendations for '{movie_title}': {tfidf_recommendations}")
+
+    # Generate recommendations using k-NN
+    knn_recommendations = get_recommendations_knn(movie_title, knn_model, tfidf_matrix, df, indices)
+    logger.info(f"k-NN Recommendations for '{movie_title}': {knn_recommendations}")

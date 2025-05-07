@@ -65,6 +65,7 @@ MovieRecommendation/
 │
 ├── .env.example              # env template (MONGO_URI, DB_NAME, COLLECTION_NAME, SECRET_KEY)
 ├── requirements.txt          # Required dependencies
+├── movie_eda.ipynb           
 └── README.md                
 
 ```
@@ -173,6 +174,27 @@ Due to file size limits on GitHub, the raw CSVs are not included in this reposit
 - **TF-IDF**: [Scikit-learn Documentation](https://scikit-learn.org/stable/modules/feature_extraction.html#tfidf-term-weighting)
 - **Flask**: [Flask Documentation](https://flask.palletsprojects.com/)
 - **MongoDB**: [MongoDB Documentation](https://www.mongodb.com/docs/)
+
+---
+
+---
+
+## Exploratory Data Analysis (EDA)
+
+Before building the recommendation system, an exploratory data analysis (EDA) was conducted to better understand the dataset and extract meaningful insights. The EDA process included:
+
+1. **Data Overview**:
+   - Summarized the dataset to identify missing values, outliers, and inconsistencies.
+   - Analyzed key statistics
+
+2. **Relationships and Correlations**:
+   - Explored relationships between features (Correlation Matrix)
+   - Created histograms and scatterplots to visualize distributions and relationships.
+
+3. **Hypothesis Testing**:
+   - Tested hypotheses, such as whether higher-budget movies tend to have higher ratings.
+
+The EDA was performed in a Jupyter Notebook located in the `src/main/movie_eda.ipynb` file. This analysis provided the foundation for data cleaning, feature engineering, and model development.
 
 ---
 ## Screenshots

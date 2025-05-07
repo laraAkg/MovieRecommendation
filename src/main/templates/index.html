@@ -25,8 +25,11 @@
                     <input type="text" class="form-control" id="movie_title" name="movie_title" autocomplete="off"
                         placeholder="e.g., Inception" required>
                 </div>
+                <select name="model_type">
+                    <option value="tfidf">TF-IDF</option>
+                    <option value="knn">k-NN</option>
+                </select>
                 <button type="submit" class="btn btn-primary">Recommend</button>
-            </form>
         </div>
 
         <!-- Recommendations -->
