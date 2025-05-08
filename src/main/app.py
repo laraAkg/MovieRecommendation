@@ -38,11 +38,12 @@ def cached_recommend_knn(title: str):
     Args:
         title (str): The title of the movie for which recommendations are needed.
     Returns:
-        list: A list of recommended movie titles with explanations.
+        list: A list of recommended movie titles.
     """
-    return  get_recommendations_knn(
+    recommendations = get_recommendations_knn(
         title=title, knn_model=knn_model, tfidf_matrix=tfidf_matrix, df=df, indices=indices
     )
+    return recommendations
   
 
 @lru_cache(maxsize=CACHE_SIZE)
@@ -65,9 +66,7 @@ def index():
     """
     Handle the main page for movie recommendations.
     Processes POST requests to fetch recommendations based on user input.
-    Logs the requested title, handles errors, and renders the index page.
     """
-
     recommendations = []
     model_type = "tfidf"  # Default to TF-IDF
     if request.method == "POST":
@@ -80,11 +79,9 @@ def index():
             else:
                 recommendations = cached_recommend(movie_title)
         except ValueError as e:
-            # Known errors (title not found)
             logger.warning(f"Error with input title: {e}")
             flash(str(e), category="warning")
         except Exception as e:
-            # Unexpected error
             logger.exception("Unexpected error in index()")
             flash(
                 "An internal error occurred. Please try again later.", category="danger"

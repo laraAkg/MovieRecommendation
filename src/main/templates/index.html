@@ -60,25 +60,6 @@
                         {% if movie.vote_average %}
                         <p class="card-text"><strong>Rating:</strong> {{ movie.vote_average }}</p>
                         {% endif %}
-                        {% if movie.explanation %}
-                        <p><strong>Explanation:</strong></p>
-                        <ul>
-                            {% if movie.explanation.genres %}
-                            <li><strong>Shared Genres:</strong> {{ movie.explanation.genres.details }}</li>
-                            {% endif %}
-                            {% if movie.explanation.cast %}
-                            <li><strong>Shared Cast Members:</strong> {{ movie.explanation.cast.details }}</li>
-                            {% endif %}
-                            {% if movie.explanation.director %}
-                            <li><strong>Same Director:</strong> {{ movie.explanation.director.details }}</li>
-                            {% endif %}
-                            {% if movie.explanation.similarity_score %}
-                            <li><strong>Similarity Score:</strong> {{ movie.explanation.similarity_score.details }}</li>
-                            {% endif %}
-                        </ul>
-                        {% else %}
-                        <p><strong>Explanation:</strong> No explanation available.</p>
-                        {% endif %}
                     </div>
                 </div>
             </div>

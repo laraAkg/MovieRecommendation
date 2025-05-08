@@ -3,7 +3,6 @@ import numpy as np
 import pandas as pd
 from scipy.sparse import spmatrix
 from sklearn.metrics.pairwise import cosine_similarity
-from explanation import explain_recommendation
 
 
 def recommend_movies(
@@ -52,7 +51,6 @@ def recommend_movies(
     for i in rec_indices:
         row = df.iloc[i].to_dict()
         row["sim_score"] = float(sim_scores[i])
-        explanation = explain_recommendation(base_movie, row)
         recommendations.append(
             {
                 "title": row.get("title", ""),
@@ -66,7 +64,6 @@ def recommend_movies(
                 "production_companies": row.get("production_companies", ""),
                 "release_date": row.get("release_date", ""),
                 "vote_average": row.get("vote_average", 0.0),
-                "explanation": explanation,
             }
         )
 

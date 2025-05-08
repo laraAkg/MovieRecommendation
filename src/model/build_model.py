@@ -5,6 +5,7 @@ import logging
 from pymongo import MongoClient
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.preprocessing import MinMaxScaler
+from sklearn.metrics import precision_score, recall_score
 import os
 from dotenv import load_dotenv
 from sklearn.neighbors import NearestNeighbors
@@ -80,7 +81,7 @@ def train_knn_model(tfidf_matrix, n_neighbors=10):
     Returns:
         NearestNeighbors: The trained k-NN model.
     """
-    knn = NearestNeighbors(metric='cosine', algorithm='brute', n_neighbors=n_neighbors)
+    knn = NearestNeighbors(metric='euclidean', algorithm='brute', n_neighbors=n_neighbors)
     knn.fit(tfidf_matrix)
     logger.info("✅ k-NN model successfully trained.")
     return knn
@@ -144,6 +145,120 @@ def get_recommendations_knn(title, knn_model, tfidf_matrix, df, indices, top_n=1
     similar_indices = neighbors.flatten()[1:]  # Exclude the input movie itself
     return df.iloc[similar_indices]['title'].tolist()
 
+from sklearn.metrics import precision_score, recall_score, accuracy_score
+
+def evaluate_knn_model(knn_model, tfidf_matrix, df, indices, test_titles, top_n=10):
+    """
+    Evaluates the performance of the k-NN model using precision, recall, and accuracy.
+    Args:
+        knn_model (NearestNeighbors): The trained k-NN model.
+        tfidf_matrix (scipy.sparse.csr_matrix): The TF-IDF matrix of combined features.
+        df (pandas.DataFrame): The DataFrame containing movie data.
+        indices (pandas.Series): A mapping of movie titles to their indices.
+        test_titles (list): A list of movie titles to use for evaluation.
+        top_n (int): The number of recommendations to consider.
+    Returns:
+        dict: A dictionary containing precision, recall, and accuracy scores.
+    """
+    y_true = []
+    y_pred = []
+
+    for title in test_titles:
+        title = title.lower()
+        if title not in indices:
+            logger.warning(f"Movie '{title}' not found in the dataset. Skipping.")
+            continue
+
+        # Get recommendations
+        idx = indices[title]
+        distances, neighbors = knn_model.kneighbors(tfidf_matrix[idx], n_neighbors=top_n+1)
+        recommended_indices = neighbors.flatten()[1:]  # Exclude the input movie itself
+        recommended_titles = df.iloc[recommended_indices]['title'].str.lower().tolist()
+
+        # Ground truth: Combine multiple features for relevance
+        true_genres = set(df.loc[idx, 'genres'].split(', '))
+        true_keywords = set(df.loc[idx, 'keywords'].split(', '))
+
+        for rec_title in recommended_titles:
+            rec_idx = indices[rec_title]
+            rec_genres = set(df.loc[rec_idx, 'genres'].split(', '))
+            rec_keywords = set(df.loc[rec_idx, 'keywords'].split(', '))
+
+
+            # Check for relevance based on multiple features
+            is_relevant = (
+                bool(true_genres & rec_genres) and
+                bool(true_keywords & rec_keywords) 
+            )
+            y_true.append(1 if is_relevant else 0)
+            y_pred.append(1)  # Predicted as relevant
+
+
+    # Calculate metrics
+    precision = precision_score(y_true, y_pred, zero_division=0)
+    recall = recall_score(y_true, y_pred, zero_division=0)
+    accuracy = accuracy_score(y_true, y_pred)
+
+    logger.info(f"✅ k-NN Model Evaluation: Precision={precision:.2f}, Recall={recall:.2f}, Accuracy={accuracy:.2f}")
+    return {"precision": precision, "recall": recall, "accuracy": accuracy}
+
+from sklearn.metrics import precision_score, recall_score, accuracy_score
+
+def evaluate_tfidf_model(tfidf_matrix, df, indices, test_titles, top_n=10):
+    """
+    Evaluates the performance of the TF-IDF model using precision, recall, and accuracy.
+    Args:
+        tfidf_matrix (scipy.sparse.csr_matrix): The TF-IDF matrix of combined features.
+        df (pandas.DataFrame): The DataFrame containing movie data.
+        indices (pandas.Series): A mapping of movie titles to their indices.
+        test_titles (list): A list of movie titles to use for evaluation.
+        top_n (int): The number of recommendations to consider.
+    Returns:
+        dict: A dictionary containing precision, recall, and accuracy scores.
+    """
+    y_true = []
+    y_pred = []
+
+    for title in test_titles:
+        title = title.lower()
+        if title not in indices:
+            logger.warning(f"Movie '{title}' not found in the dataset. Skipping.")
+            continue
+
+        # Get recommendations using TF-IDF
+        idx = indices[title]
+        cosine_sim = cosine_similarity(tfidf_matrix[idx], tfidf_matrix).flatten()
+        similar_indices = cosine_sim.argsort()[-top_n-1:-1][::-1]  # Exclude the input movie itself
+        recommended_titles = df.iloc[similar_indices]['title'].str.lower().tolist()
+
+        # Ground truth: Combine multiple features for relevance
+        true_genres = set(df.loc[idx, 'genres'].split(', '))
+        true_keywords = set(df.loc[idx, 'keywords'].split(', '))
+
+
+        for rec_title in recommended_titles:
+            rec_idx = indices[rec_title]
+            rec_genres = set(df.loc[rec_idx, 'genres'].split(', '))
+            rec_keywords = set(df.loc[rec_idx, 'keywords'].split(', '))
+
+
+            # Check for relevance based on multiple features
+            is_relevant = (
+                bool(true_genres & rec_genres) and
+                bool(true_keywords & rec_keywords) 
+        
+            )
+            y_true.append(1 if is_relevant else 0)
+            y_pred.append(1)  # Predicted as relevant
+
+    # Calculate metrics
+    precision = precision_score(y_true, y_pred, zero_division=0)
+    recall = recall_score(y_true, y_pred, zero_division=0)
+    accuracy = accuracy_score(y_true, y_pred)
+
+    logger.info(f"✅ TF-IDF Model Evaluation: Precision={precision:.2f}, Recall={recall:.2f}, Accuracy={accuracy:.2f}")
+    return {"precision": precision, "recall": recall, "accuracy": accuracy}
+
 # Main workflow
 if __name__ == "__main__":
     # Connect to MongoDB
@@ -177,11 +292,6 @@ if __name__ == "__main__":
                      'production_countries', 'production_companies', 'release_date', 'vote_average', 'vote_count']]
 
 
-    df_reduced = df[['title', 'overview', 'genres', 'cast', 'crew', 'keywords', 'tagline',
-                     'production_countries', 'production_companies', 'release_date', 'vote_average', 'vote_count'
-                    ]]
-
-
         # Combine text columns into a single column
     df['combined_features'] = (
         df['title'].fillna('') + ' ' +
@@ -200,15 +310,15 @@ if __name__ == "__main__":
     
 
     # TF-IDF vectorization
-    tfidf = TfidfVectorizer(stop_words='english', max_features=5000, ngram_range=(1, 2))
-    tfidf_matrix = tfidf.fit_transform(df['combined_features'])
+    tfidf_model = TfidfVectorizer(stop_words='english', max_features=5000, ngram_range=(1, 2))
+    tfidf_matrix = tfidf_model.fit_transform(df['combined_features'])
 
     indices = pd.Series(df.index, index=df['title'].str.lower()).drop_duplicates()
 
     # Save the model
     model_dir = 'created_model'
     os.makedirs(model_dir, exist_ok=True)
-    save_model('created_model/light_model.pkl', df_reduced, tfidf, indices, tfidf_matrix)
+    save_model('created_model/light_model.pkl', df_reduced, tfidf_model, indices, tfidf_matrix)
 
     # Train k-NN-Model
     knn_model = train_knn_model(tfidf_matrix)
@@ -216,13 +326,9 @@ if __name__ == "__main__":
     # Save k-NN-Model
     save_knn_model('created_model/knn_model.pkl', knn_model)
 
-    # Example movie title
-    movie_title = "The Dark Knight"
+    test_titles = ['Inception', 'The Matrix', 'Titanic']  # Beispiel-Testtitel
+    metrics = evaluate_knn_model(knn_model, tfidf_matrix, df, indices, test_titles)
+    print(metrics)
 
-    # Generate recommendations using TF-IDF
-    tfidf_recommendations = get_recommendations_tfidf(movie_title, tfidf_matrix, df, indices)
-    logger.info(f"TF-IDF Recommendations for '{movie_title}': {tfidf_recommendations}")
-
-    # Generate recommendations using k-NN
-    knn_recommendations = get_recommendations_knn(movie_title, knn_model, tfidf_matrix, df, indices)
-    logger.info(f"k-NN Recommendations for '{movie_title}': {knn_recommendations}")
+    metrics_tfidf = evaluate_tfidf_model(tfidf_matrix, df, indices, test_titles)
+    print(metrics_tfidf)

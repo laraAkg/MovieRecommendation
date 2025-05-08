@@ -51,39 +51,12 @@ class DataCleaner:
         return ''
 
     @staticmethod
-    def combine_features(row):
-        """
-        Combines various features of a movie into a single string for further processing.
-        Args:
-            row (pd.Series): A pandas Series object representing a row of movie data. 
-                             It is expected to contain the following keys:
-                             - 'overview': A brief summary of the movie.
-                             - 'genres': A list of genres associated with the movie.
-                             - 'keywords': A list of keywords describing the movie.
-                             - 'cast': A list of cast members in the movie.
-                             - 'crew': A list of crew members, including the director.
-                             - 'tagline': A tagline associated with the movie.
-        Returns:
-            str: A single string combining the overview, genres, keywords, cast, director, 
-                 and tagline, with appropriate handling for missing or null values.
-        """
-        
-        overview = str(row['overview']) if pd.notnull(row['overview']) else ''
-        genres = DataCleaner.get_names(row['genres']) * 2
-        keywords = DataCleaner.get_names(row['keywords']) * 2
-        cast = DataCleaner.get_names(row['cast'])
-        director = DataCleaner.get_director(row['crew']) * 2
-        tagline = str(row['tagline']) if pd.notnull(row['tagline']) else ''
-        return ' '.join([overview, genres, keywords, cast, director, tagline]).strip()
-
-    @staticmethod
     def clean_data(df):
         """
         Cleans and preprocesses a DataFrame containing movie data.
         This function performs the following operations:
         1. Parses specific columns containing list-of-dictionaries into a usable format.
-        2. Generates a 'combined_features' column by combining relevant features.
-        3. Removes rows with missing or empty 'title' or 'combined_features'.
+        3. Removes rows with missing or empty 'title' .
         4. Drops duplicate rows based on the 'title' column.
         5. Normalizes and cleans specific fields such as 'title', 'production_countries', and 'production_companies'.
         6. Converts the 'release_date' column to a standardized date format (YYYY-MM-DD).
@@ -98,12 +71,8 @@ class DataCleaner:
         for col in ['genres', 'keywords', 'cast', 'crew', 'production_countries', 'production_companies']:
             df[col] = df[col].apply(DataCleaner.parse_column)
 
-        # Generate combined features
-        df['combined_features'] = df.apply(DataCleaner.combine_features, axis=1)
-
         # Clean data
-        df.dropna(subset=['title', 'combined_features'], inplace=True)
-        df = df[df['combined_features'].str.strip() != '']
+        df.dropna(subset=['title'], inplace=True)
         df = df.drop_duplicates(subset='title', inplace=False)
         
         # Normalize titles and clean additional fields
