@@ -1,10 +1,9 @@
 import logging
 from flask import Flask, render_template, request, jsonify, flash
 import pickle
-from functools import lru_cache
-from recommendation import recommend_movies
+from model.recommendation import recommend_movies
 import os
-from recommendation import get_recommendations_knn
+from model.recommendation import get_recommendations_knn
 from dotenv import load_dotenv
 
 
@@ -29,37 +28,6 @@ with open("created_model/light_model.pkl", "rb") as f:
 with open("created_model/knn_model.pkl", "rb") as f:
     knn_model = pickle.load(f)
 
-CACHE_SIZE = 128
-
-@lru_cache(maxsize=CACHE_SIZE)
-def cached_recommend_knn(title: str):
-    """
-    Get cached movie recommendations for a given title using the k-NN model.
-    Args:
-        title (str): The title of the movie for which recommendations are needed.
-    Returns:
-        list: A list of recommended movie titles.
-    """
-    recommendations = get_recommendations_knn(
-        title=title, knn_model=knn_model, tfidf_matrix=tfidf_matrix, df=df, indices=indices
-    )
-    return recommendations
-  
-
-@lru_cache(maxsize=CACHE_SIZE)
-def cached_recommend(title: str):
-    """
-    Get cached movie recommendations for a given title.
-    Args:
-        title (str): The title of the movie for which recommendations are needed.
-    Returns:
-        list: A list of recommended movie titles.
-    """
-
-    return recommend_movies(
-        title=title, df=df, tfidf_matrix=tfidf_matrix, indices=indices
-    )
-
 
 @app.route("/", methods=["GET", "POST"])
 def index():
@@ -75,9 +43,20 @@ def index():
         logger.info(f"User requested: {movie_title!r} using model: {model_type!r}")
         try:
             if model_type == "knn":
-                recommendations = cached_recommend_knn(movie_title)
+                recommendations = get_recommendations_knn(
+                    title=movie_title,
+                    knn_model=knn_model,
+                    tfidf_matrix=tfidf_matrix,
+                    df=df,
+                    indices=indices,
+                )
             else:
-                recommendations = cached_recommend(movie_title)
+                recommendations = recommend_movies(
+                    title=movie_title,
+                    df=df,
+                    tfidf_matrix=tfidf_matrix,
+                    indices=indices,
+                )
         except ValueError as e:
             logger.warning(f"Error with input title: {e}")
             flash(str(e), category="warning")
@@ -86,7 +65,6 @@ def index():
             flash(
                 "An internal error occurred. Please try again later.", category="danger"
             )
-
     return render_template("index.html", recommendations=recommendations, model_type=model_type)
 
 @app.errorhandler(404)
@@ -97,7 +75,6 @@ def page_not_found(e):
 
 @app.errorhandler(500)
 def internal_error(e):
-    # Logger.exception prints the stack trace
     logger.exception("500 Internal Server Error")
     return render_template("500.html"), 500
 
@@ -108,6 +85,5 @@ def titles():
 
 
 if __name__ == "__main__":
-    # Reduce verbosity of Flask's built-in logging
     logging.getLogger("werkzeug").setLevel(logging.WARNING)
     app.run(debug=True)
