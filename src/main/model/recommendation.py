@@ -3,12 +3,10 @@ import numpy as np
 import pandas as pd
 from scipy.sparse import spmatrix
 import ast
-
 from sklearn.neighbors import NearestNeighbors
 from sklearn.metrics.pairwise import cosine_similarity
 
 def format_movie_info(row: Dict[str, Any]) -> Dict[str, Any]:
-    # Verarbeitung von production_companies
     try:
         production_companies = ast.literal_eval(row.get("production_companies", ""))
         if isinstance(production_companies, list):
@@ -18,7 +16,6 @@ def format_movie_info(row: Dict[str, Any]) -> Dict[str, Any]:
     except (ValueError, SyntaxError):
         production_companies = ""
 
-    # Verarbeitung von production_countries
     try:
         production_countries = ast.literal_eval(row.get("production_countries", ""))
         if isinstance(production_countries, list):
@@ -28,7 +25,6 @@ def format_movie_info(row: Dict[str, Any]) -> Dict[str, Any]:
     except (ValueError, SyntaxError):
         production_countries = ""
 
-    # Verarbeitung von genres
     try:
         genres = ast.literal_eval(row.get("genres", ""))
         if isinstance(genres, list):
@@ -38,7 +34,6 @@ def format_movie_info(row: Dict[str, Any]) -> Dict[str, Any]:
     except (ValueError, SyntaxError):
         genres = ""
 
-    # Verarbeitung von cast
     try:
         cast = ast.literal_eval(row.get("cast", ""))
         if isinstance(cast, list):

@@ -7,9 +7,7 @@ from model.recommendation import get_recommendations_knn
 from dotenv import load_dotenv
 
 
-# Load environment variables from .env file
 load_dotenv()
-# --- Logging setup ---
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s %(levelname)-8s %(name)s: %(message)s",
@@ -20,11 +18,9 @@ logger = logging.getLogger(__name__)
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY")
 
-# --- Load model + cache setup ---
 with open("created_model/light_model.pkl", "rb") as f:
     df, tfidf_vectorizer, indices, tfidf_matrix = pickle.load(f)
     
-# Load k-NN model
 with open("created_model/knn_model.pkl", "rb") as f:
     knn_model = pickle.load(f)
 
@@ -39,7 +35,7 @@ def index():
     model_type = "tfidf"  # Default to TF-IDF
     if request.method == "POST":
         movie_title = request.form.get("movie_title", "").strip()
-        model_type = request.form.get("model_type", "tfidf").strip()  # Get model type from form
+        model_type = request.form.get("model_type", "tfidf").strip() 
         logger.info(f"User requested: {movie_title!r} using model: {model_type!r}")
         try:
             if model_type == "knn":

@@ -5,7 +5,7 @@ import os
 from sklearn.feature_extraction.text import TfidfVectorizer
 from dotenv import load_dotenv
 from sklearn.neighbors import NearestNeighbors
-from model_evaluator import evaluate_knn, evaluate_tfidf
+from model_evaluator import evaluate_tfidf, train_and_evaluate_knn, plot_all_metrics
 from helper.mongodb_handler import MongoDBHandler
 
 MODEL_DIR = "created_model"
@@ -48,7 +48,6 @@ def build_combined_features(df):
     )
 
 
-# Main workflow
 def main():
 
     mongo_handler = MongoDBHandler(
@@ -71,10 +70,20 @@ def main():
     knn_model = train_knn_model(tfidf_matrix)
 
     save_pickle("created_model/knn_model.pkl", knn_model)
+    test_titles = ["High School Musical"] 
 
-    test_titles = ["Inception", "The Matrix", "Titanic"]  # Beispiel-Testtitel
-    metrics = evaluate_knn(knn_model, tfidf_matrix, df, indices, test_titles)
-    logger.info(metrics)
+    distance_metrics = ["euclidean", "cosine", "manhattan"]
+
+    results = train_and_evaluate_knn(tfidf_matrix, df, indices, test_titles, metrics=distance_metrics)
+
+    best_metric = max(results, key=lambda metric: results[metric]["accuracy"])
+    logger.info(f"Beste Distanzmetrik: {best_metric}")
+
+    plot_all_metrics(results, output_file="all_metrics_performance.png")
+
+    knn_model = NearestNeighbors(n_neighbors=10, metric=best_metric, algorithm="brute")
+    knn_model.fit(tfidf_matrix)
+    save_pickle("created_model/knn_model.pkl", knn_model)
 
     metrics_tfidf = evaluate_tfidf(tfidf_matrix, df, indices, test_titles)
     logger.info(metrics_tfidf)

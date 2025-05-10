@@ -1,11 +1,14 @@
 import logging
 from sklearn.metrics import precision_score, recall_score, accuracy_score
 from sklearn.metrics.pairwise import cosine_similarity
+import matplotlib.pyplot as plt
+from sklearn.neighbors import NearestNeighbors
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
+
 
 def evaluate_knn(model, tfidf_matrix, df, indices, test_titles, top_n=10):
     all_true, all_pred = [], []
@@ -14,12 +17,13 @@ def evaluate_knn(model, tfidf_matrix, df, indices, test_titles, top_n=10):
         if idx is None:
             logger.warning(f"'{title}' not found. Skipping.")
             continue
-        _, neighbors = model.kneighbors(tfidf_matrix[idx], n_neighbors=top_n+1)
+        _, neighbors = model.kneighbors(tfidf_matrix[idx], n_neighbors=top_n + 1)
         rec_titles = df.iloc[neighbors.flatten()[1:]]["title"].tolist()
         y_true, y_pred = _evaluate(rec_titles, idx, df, indices)
         all_true.extend(y_true)
         all_pred.extend(y_pred)
     return _compute_metrics(all_true, all_pred)
+
 
 def evaluate_tfidf(tfidf_matrix, df, indices, test_titles, top_n=10):
     all_true, all_pred = [], []
@@ -29,12 +33,13 @@ def evaluate_tfidf(tfidf_matrix, df, indices, test_titles, top_n=10):
             logger.warning(f"'{title}' not found. Skipping.")
             continue
         sims = cosine_similarity(tfidf_matrix[idx], tfidf_matrix).flatten()
-        rec_indices = sims.argsort()[-top_n-1:-1][::-1]
+        rec_indices = sims.argsort()[-top_n - 1 : -1][::-1]
         rec_titles = df.iloc[rec_indices]["title"].tolist()
         y_true, y_pred = _evaluate(rec_titles, idx, df, indices)
         all_true.extend(y_true)
         all_pred.extend(y_pred)
     return _compute_metrics(all_true, all_pred)
+
 
 def _evaluate(recommended_titles, target_idx, df, indices):
     true_genres = set(df.loc[target_idx, "genres"].split(", "))
@@ -53,9 +58,49 @@ def _evaluate(recommended_titles, target_idx, df, indices):
         y_pred.append(1)
     return y_true, y_pred
 
+
 def _compute_metrics(y_true, y_pred):
     return {
         "precision": precision_score(y_true, y_pred, zero_division=0),
         "recall": recall_score(y_true, y_pred, zero_division=0),
         "accuracy": accuracy_score(y_true, y_pred),
     }
+
+
+def train_and_evaluate_knn(
+    tfidf_matrix, df, indices, test_titles, metrics=["euclidean", "cosine", "manhattan"]
+):
+    results = {}
+
+    for metric in metrics:
+        logger.info(f"Training k-NN model with metric: {metric}")
+        knn_model = NearestNeighbors(n_neighbors=10, metric="euclidean", algorithm="brute")
+        knn_model.fit(tfidf_matrix)
+
+        metrics_knn = evaluate_knn(knn_model, tfidf_matrix, df, indices, test_titles)
+        results[metric] = metrics_knn
+
+    return results
+
+
+def plot_all_metrics(results, output_file="all_metrics_performance.png"):
+    labels = list(next(iter(results.values())).keys())
+    metrics = list(results.keys())
+    data = {metric: list(results[metric].values()) for metric in metrics}
+
+    x = range(len(labels))
+    width = 0.2
+    plt.figure(figsize=(12, 8))
+
+    for i, (metric, values) in enumerate(data.items()):
+        plt.bar([pos + i * width for pos in x], values, width=width, label=metric)
+
+    plt.xlabel("Metriken")
+    plt.ylabel("Werte")
+    plt.title("Performance der k-NN-Modelle für verschiedene Distanzmetriken")
+    plt.xticks([pos + width for pos in x], labels)
+    plt.legend()
+    plt.tight_layout()
+    plt.savefig(output_file)
+    plt.close()
+    print(f"✅ Grafik erfolgreich gespeichert unter {output_file}")
