@@ -7,15 +7,12 @@ logger = logging.getLogger(__name__)
 class MongoDBHandler:
     def __init__(self, uri, db_name, collection_name):
         """
-        Initializes a connection to a MongoDB collection.
+        Initializes the MongoDB handler with the specified URI, database name, and collection name.
+
         Args:
-            uri (str): The MongoDB connection URI.
+            uri (str): The connection URI for the MongoDB instance.
             db_name (str): The name of the database to connect to.
-            collection_name (str): The name of the collection within the database.
-        Attributes:
-            client (MongoClient): The MongoDB client instance.
-            db (Database): The database instance.
-            collection (Collection): The collection instance within the database.
+            collection_name (str): The name of the collection to interact with.
         """
         self.client = MongoClient(uri)
         self.db = self.client[db_name]
@@ -24,14 +21,13 @@ class MongoDBHandler:
     def save_data(self, data, batch_size=1000):
         """
         Saves the provided data into the MongoDB collection in batches.
-        This method first clears the existing data in the collection by deleting all documents.
-        Then, it inserts the new data in batches of the specified size.
         Args:
-            data (list[dict]): A list of dictionaries representing the data to be saved.
+            data (list): The data to be saved, represented as a list of documents.
             batch_size (int, optional): The number of documents to insert per batch. Defaults to 1000.
-        Returns:
-            None
-        """ 
+        Side Effects:
+            Clears the existing data in the collection before inserting the new data.
+            Prints the progress of batch insertion.
+        """
         self.collection.delete_many({})
         for i in range(0, len(data), batch_size):
             batch = data[i:i + batch_size]
@@ -40,15 +36,14 @@ class MongoDBHandler:
 
     def load_data(self):
         """
-        Load data from the MongoDB collection and return it as a pandas DataFrame.
-        This function retrieves all documents from the specified MongoDB collection,
-        excluding the '_id' field, and converts the data into a pandas DataFrame.
-        If the collection is empty, a ValueError is raised.
+        Loads data from the MongoDB collection into a pandas DataFrame.
+
         Returns:
-            pandas.DataFrame: A DataFrame containing the data from the MongoDB collection.
+            pd.DataFrame: A DataFrame containing the cleaned movies data.
+
         Raises:
             ValueError: If no data is found in the MongoDB collection.
-            Exception: If there is an error during the data retrieval process.
+            SystemExit: If an error occurs during data loading.
         """
         try:
             data = list(self.collection.find({}, {'_id': 0}))
