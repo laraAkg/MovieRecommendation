@@ -53,7 +53,7 @@ def _evaluate(recommended_titles, target_idx, df, indices):
             continue
         rec_genres = set(df.loc[rec_idx, "genres"].split(", "))
         rec_keywords = set(df.loc[rec_idx, "keywords"].split(", "))
-        is_relevant = bool(true_genres & rec_genres and true_keywords & rec_keywords)
+        is_relevant = bool(true_genres & rec_genres or true_keywords & rec_keywords)
         y_true.append(1 if is_relevant else 0)
         y_pred.append(1)
     return y_true, y_pred
@@ -74,7 +74,7 @@ def train_and_evaluate_knn(
     models = {}
     for metric in metrics:
         logger.info(f"Training k-NN model with metric: {metric}")
-        knn_model = NearestNeighbors(n_neighbors=10, metric=metric, algorithm="brute")
+        knn_model = NearestNeighbors(n_neighbors=9, metric=metric, algorithm="brute")
         knn_model.fit(tfidf_matrix)
 
         metrics_knn = evaluate_knn(knn_model, tfidf_matrix, df, indices, test_titles)
