@@ -1,9 +1,9 @@
 import logging
 from flask import Flask, render_template, request, jsonify, flash
 import pickle
-from model.recommendation import recommend_movies
+from recommendation import recommend_movies
 import os
-from model.recommendation import get_recommendations_knn
+from recommendation import get_recommendations_knn
 from dotenv import load_dotenv
 
 
