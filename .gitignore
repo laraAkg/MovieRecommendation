@@ -99,4 +99,4 @@ $RECYCLE.BIN/
 *.sublime-workspace
 *.sublime-project
 
-*.pkl
+*.pklcreated_model/light_model.pkl
