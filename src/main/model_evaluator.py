@@ -2,6 +2,7 @@ import logging
 from sklearn.metrics import precision_score, recall_score, accuracy_score
 from sklearn.metrics.pairwise import cosine_similarity
 import matplotlib.pyplot as plt
+import pickle
 from sklearn.neighbors import NearestNeighbors
 
 logging.basicConfig(
@@ -179,3 +180,58 @@ def plot_all_metrics(results, output_file="all_metrics_performance.png"):
     plt.savefig(output_file)
     plt.close()
     print(f"✅ Grafik erfolgreich gespeichert unter {output_file}")
+
+def save_pickle(filename, obj):
+    """
+    Save an object to a file using pickle.
+
+    Args:
+        filename (str): The path to the file where the object will be saved.
+        obj (any): The object to be serialized and saved.
+    """
+    with open(filename, 'wb') as f:
+        pickle.dump(obj, f)
+    logging.info(f"Model saved under {filename}")
+
+
+def build_combined_features(df):
+    """
+    Combine multiple text-based columns from a DataFrame into a single string for each row.
+
+    Parameters:
+        df (pd.DataFrame): Input DataFrame containing the columns 'title', 
+                           'production_companies', 'production_countries', 
+                           'overview', 'genres', and 'keywords'.
+
+    Returns:
+        pd.Series: A Series where each row is a concatenated string of the specified columns.
+    """
+    return (
+        df["title"].fillna("") + " " +
+        df["production_companies"].fillna("").astype(str) + " " +
+        df["production_countries"].fillna("").astype(str) + " " +
+        df["overview"].fillna("") + " " +
+        df["genres"].fillna("").astype(str) + " " +
+        df["keywords"].fillna("").astype(str)
+    )
+
+def build_combined_features_v2(df):
+    """
+    Combines multiple text-based columns from a DataFrame into a single string for each row.
+
+    Parameters:
+        df (pd.DataFrame): Input DataFrame containing columns like 'title', 'overview', 
+                           'genres', 'cast', 'crew', 'tagline', and 'keywords'.
+
+    Returns:
+        pd.Series: A Series where each row is a concatenated string of the specified columns.
+    """
+    return (
+        df["title"].fillna("") + " " +
+        df["overview"].fillna("") + " " +
+        df["genres"].fillna("").astype(str) + " " +
+        df["cast"].fillna("").astype(str) + " " +
+        df["crew"].fillna("").astype(str) + " " +
+        df["tagline"].fillna("") + " " +
+        df["keywords"].fillna("").astype(str)
+    )
