@@ -7,6 +7,17 @@ from sklearn.neighbors import NearestNeighbors
 from sklearn.metrics.pairwise import cosine_similarity
 
 def format_movie_info(row: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Formats movie information from a given row dictionary.
+
+    Args:
+        row (Dict[str, Any]): A dictionary containing movie data.
+
+    Returns:
+        Dict[str, Any]: A dictionary with formatted movie details including title, overview, genres, cast, 
+                        director, keywords, tagline, production countries, production companies, release date, 
+                        and vote average.
+    """
     try:
         production_companies = ast.literal_eval(row.get("production_companies", ""))
         if isinstance(production_companies, list):
@@ -66,6 +77,16 @@ def recommend_movies(
 ) -> List[Dict[str, Any]]:
     """
     Generate movie recommendations using cosine similarity on TF-IDF vectors.
+    Args:
+        title (str): The title of the movie for which recommendations are to be generated.
+        df (pd.DataFrame): DataFrame containing movie information.
+        tfidf_matrix (spmatrix): Sparse matrix of TF-IDF features.
+        indices (Dict[str, int]): Mapping of movie titles (lowercase) to their indices in the TF-IDF matrix.
+        top_n (int): Number of top recommendations to return.
+    Returns:
+        List[Dict[str, Any]]: A list of dictionaries containing movie recommendations.
+    Raises:
+        ValueError: If the specified title is not found in the dataset.
     """
     key = title.lower().strip()
     if key not in indices:
@@ -89,6 +110,17 @@ def get_recommendations_knn(
 ) -> List[Dict[str, Any]]:
     """
     Generate movie recommendations using the k-NN model.
+    Args:
+        title (str): The title of the movie for which recommendations are to be generated.
+        knn_model (NearestNeighbors): Trained k-NN model.
+        tfidf_matrix (spmatrix): Sparse matrix of TF-IDF features.
+        df (pd.DataFrame): DataFrame containing movie information.
+        indices (Dict[str, int]): Mapping of movie titles (lowercase) to their indices in the TF-IDF matrix.
+        top_n (int): Number of top recommendations to return.
+    Returns:
+        List[Dict[str, Any]]: A list of dictionaries containing movie recommendations.
+    Raises:
+        ValueError: If the specified title is not found in the dataset.
     """
     key = title.lower().strip()
     if key not in indices:

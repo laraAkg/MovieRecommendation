@@ -4,7 +4,6 @@ import logging
 import os
 from sklearn.feature_extraction.text import TfidfVectorizer
 from dotenv import load_dotenv
-from sklearn.neighbors import NearestNeighbors
 from model_evaluator import evaluate_tfidf, train_and_evaluate_knn, plot_all_metrics
 from mongodb_handler import MongoDBHandler
 
@@ -18,12 +17,30 @@ logger = logging.getLogger(__name__)
 load_dotenv()
 
 def save_pickle(filename, obj):
+    """
+    Save an object to a file using pickle.
+
+    Args:
+        filename (str): The path to the file where the object will be saved.
+        obj (any): The object to be serialized and saved.
+    """
     with open(filename, 'wb') as f:
         pickle.dump(obj, f)
-    logging.info(f"✅ Objekt erfolgreich gespeichert unter {filename}")
+    logging.info(f"Model saved under {filename}")
 
 
 def build_combined_features(df):
+    """
+    Combine multiple text-based columns from a DataFrame into a single string for each row.
+
+    Parameters:
+        df (pd.DataFrame): Input DataFrame containing the columns 'title', 
+                           'production_companies', 'production_countries', 
+                           'overview', 'genres', and 'keywords'.
+
+    Returns:
+        pd.Series: A Series where each row is a concatenated string of the specified columns.
+    """
     return (
         df["title"].fillna("") + " " +
         df["production_companies"].fillna("").astype(str) + " " +
@@ -34,6 +51,16 @@ def build_combined_features(df):
     )
 
 def build_combined_features_v2(df):
+    """
+    Combines multiple text-based columns from a DataFrame into a single string for each row.
+
+    Parameters:
+        df (pd.DataFrame): Input DataFrame containing columns like 'title', 'overview', 
+                           'genres', 'cast', 'crew', 'tagline', and 'keywords'.
+
+    Returns:
+        pd.Series: A Series where each row is a concatenated string of the specified columns.
+    """
     return (
         df["title"].fillna("") + " " +
         df["overview"].fillna("") + " " +
@@ -64,7 +91,7 @@ def main():
 
     results, models = train_and_evaluate_knn(tfidf_matrix, df, indices, test_titles)
     best_metric = max(results, key=lambda metric: results[metric]["accuracy"])
-    logger.info(f"Beste Distanzmetrik: {best_metric}")
+    logger.info(f"Best Distance metric: {best_metric}")
     plot_all_metrics(results, output_file="all_metrics_performance.png")
     best_model = models[best_metric]
     save_pickle("created_model/knn_model.pkl", best_model)

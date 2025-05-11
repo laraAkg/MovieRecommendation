@@ -11,6 +11,20 @@ logger = logging.getLogger(__name__)
 
 
 def evaluate_knn(model, tfidf_matrix, df, indices, test_titles, top_n=10):
+    """
+    Evaluates the performance of a k-Nearest Neighbors (kNN) model for movie recommendations.
+
+    Args:
+        model: The trained kNN model.
+        tfidf_matrix: Sparse matrix of TF-IDF features.
+        df: DataFrame containing movie data.
+        indices: Dictionary mapping movie titles to their indices.
+        test_titles: List of movie titles to evaluate.
+        top_n: Number of top recommendations to consider (default is 10).
+
+    Returns:
+        dict: Evaluation metrics computed from true and predicted labels.
+    """
     all_true, all_pred = [], []
     for title in test_titles:
         idx = indices.get(title.lower())
@@ -26,6 +40,19 @@ def evaluate_knn(model, tfidf_matrix, df, indices, test_titles, top_n=10):
 
 
 def evaluate_tfidf(tfidf_matrix, df, indices, test_titles, top_n=10):
+    """
+    Evaluates the performance of a TF-IDF-based recommendation system.
+
+    Args:
+        tfidf_matrix (scipy.sparse.csr_matrix): The TF-IDF matrix representing item features.
+        df (pandas.DataFrame): DataFrame containing item metadata, including titles.
+        indices (dict): Mapping of item titles (lowercased) to their indices in the TF-IDF matrix.
+        test_titles (list of str): List of titles to evaluate recommendations for.
+        top_n (int, optional): Number of top recommendations to consider. Defaults to 10.
+
+    Returns:
+        dict: A dictionary containing evaluation metrics (e.g., precision, recall, F1-score).
+    """
     all_true, all_pred = [], []
     for title in test_titles:
         idx = indices.get(title.lower())
@@ -42,6 +69,18 @@ def evaluate_tfidf(tfidf_matrix, df, indices, test_titles, top_n=10):
 
 
 def _evaluate(recommended_titles, target_idx, df, indices):
+    """
+    Evaluate the relevance of recommended titles based on genres and keywords.
+
+    Args:
+        recommended_titles (list): List of recommended movie titles.
+        target_idx (int): Index of the target movie in the DataFrame.
+        df (pd.DataFrame): DataFrame containing movie information with 'genres' and 'keywords' columns.
+        indices (dict): Mapping of movie titles (lowercase) to their indices in the DataFrame.
+
+    Returns:
+        tuple: Two lists - y_true (ground truth relevance) and y_pred (predicted relevance).
+    """
     true_genres = set(str(df.loc[target_idx, "genres"]).split(", "))
     true_keywords = set(str(df.loc[target_idx, "keywords"]).split(", "))
     y_true = []
@@ -60,6 +99,16 @@ def _evaluate(recommended_titles, target_idx, df, indices):
 
 
 def _compute_metrics(y_true, y_pred):
+    """
+    Compute evaluation metrics for classification.
+
+    Args:
+        y_true (array-like): True labels.
+        y_pred (array-like): Predicted labels.
+
+    Returns:
+        dict: Dictionary containing precision, recall, and accuracy scores.
+    """
     return {
         "precision": precision_score(y_true, y_pred, zero_division=0),
         "recall": recall_score(y_true, y_pred, zero_division=0),
@@ -70,6 +119,17 @@ def _compute_metrics(y_true, y_pred):
 def train_and_evaluate_knn(
     tfidf_matrix, df, indices, test_titles, metrics=["euclidean", "manhattan"]
 ):
+    """
+    Train and evaluate k-NN models with different distance metrics.
+    Args:
+        tfidf_matrix (scipy.sparse.csr_matrix): The TF-IDF matrix representing item features.
+        df (pandas.DataFrame): DataFrame containing item metadata, including titles.
+        indices (dict): Mapping of item titles (lowercased) to their indices in the TF-IDF matrix.
+        test_titles (list of str): List of titles to evaluate recommendations for.
+        metrics (list of str): List of distance metrics to evaluate.
+    Returns:
+        dict: A dictionary containing evaluation metrics for each distance metric.
+    """
     results = {}
     models = {}
     for metric in metrics:
@@ -86,8 +146,19 @@ def train_and_evaluate_knn(
         logger.info(f"Metric: {metric}, Results: {metric_results}")
     return results, models
 
-
 def plot_all_metrics(results, output_file="all_metrics_performance.png"):
+    """
+    Plots bar charts for multiple metrics and saves the plot as an image.
+
+    Args:
+        results (dict): A dictionary where keys are metric names and values are 
+                        dictionaries mapping labels to their corresponding values.
+        output_file (str): The file path to save the generated plot. Defaults to 
+                           "all_metrics_performance.png".
+
+    Returns:
+        None
+    """
     labels = list(next(iter(results.values())).keys())
     metrics = list(results.keys())
     data = {metric: list(results[metric].values()) for metric in metrics}

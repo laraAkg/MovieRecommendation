@@ -1,6 +1,24 @@
+"""
+This script performs the following tasks:
+1. Loads movie data with a specified maximum number of missing values.
+2. Filters the dataset to retain only important columns.
+3. Cleans the dataset by removing rows with missing titles and duplicate titles.
+4. Saves the cleaned dataset to a MongoDB collection.
+
+Modules:
+- logging: For logging script progress and events.
+- data_loader: Contains functions to load and filter the dataset.
+- mongodb_handler: Handles MongoDB operations.
+- os, dotenv: For environment variable management.
+
+Environment Variables:
+- MONGO_URI: MongoDB connection URI.
+- DB_NAME: Name of the MongoDB database.
+- COLLECTION_NAME: Name of the MongoDB collection.
+"""
 import logging
 from data_loader import load_data, filter_important_columns
-from mongodb_handler import MongoDBHandler  # Ensure this module exists and contains MongoDBHandler
+from mongodb_handler import MongoDBHandler
 import os
 from dotenv import load_dotenv
 
@@ -30,4 +48,4 @@ mongo_handler = MongoDBHandler(
 
 mongo_handler.save_data(df.to_dict(orient="records"))
 
-logger.info(f"✅ {len(df)} cleaned movies successfully saved to MongoDB!")
+logger.info(f"{len(df)} cleaned movies successfully saved to MongoDB!")

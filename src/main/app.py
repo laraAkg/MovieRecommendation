@@ -6,7 +6,6 @@ import os
 from recommendation import get_recommendations_knn
 from dotenv import load_dotenv
 
-
 load_dotenv()
 logging.basicConfig(
     level=logging.INFO,
@@ -28,8 +27,7 @@ with open("created_model/knn_model.pkl", "rb") as f:
 @app.route("/", methods=["GET", "POST"])
 def index():
     """
-    Handle the main page for movie recommendations.
-    Processes POST requests to fetch recommendations based on user input.
+    Render the main page and handle movie recommendations.
     """
     recommendations = []
     model_type = "tfidf"  # Default to TF-IDF
@@ -65,18 +63,27 @@ def index():
 
 @app.errorhandler(404)
 def page_not_found(e):
+    """
+    Custom 404 error handler.
+    """
     logger.warning(f"404 triggered: {request.path}")
     return render_template("404.html"), 404
 
 
 @app.errorhandler(500)
 def internal_error(e):
+    """
+    Custom 500 error handler.
+    """
     logger.exception("500 Internal Server Error")
     return render_template("500.html"), 500
 
 
 @app.route("/titles", methods=["GET"])
 def titles():
+    """
+    Endpoint to fetch movie titles for the autocomplete feature.
+    """
     return jsonify(df["title"].tolist())
 
 
