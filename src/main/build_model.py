@@ -18,7 +18,6 @@ logger = logging.getLogger(__name__)
 load_dotenv()
 
 def save_pickle(filename, obj):
-    os.makedirs(os.path.dirname(filename), exist_ok=True)  # Ensure the directory exists
     with open(filename, 'wb') as f:
         pickle.dump(obj, f)
     logging.info(f"✅ Objekt erfolgreich gespeichert unter {filename}")
