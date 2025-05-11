@@ -42,8 +42,8 @@ def evaluate_tfidf(tfidf_matrix, df, indices, test_titles, top_n=10):
 
 
 def _evaluate(recommended_titles, target_idx, df, indices):
-    true_genres = set(df.loc[target_idx, "genres"].split(", "))
-    true_keywords = set(df.loc[target_idx, "keywords"].split(", "))
+    true_genres = set(str(df.loc[target_idx, "genres"]).split(", "))
+    true_keywords = set(str(df.loc[target_idx, "keywords"]).split(", "))
     y_true = []
     y_pred = []
 
@@ -51,8 +51,8 @@ def _evaluate(recommended_titles, target_idx, df, indices):
         rec_idx = indices.get(rec_title.lower())
         if rec_idx is None:
             continue
-        rec_genres = set(df.loc[rec_idx, "genres"].split(", "))
-        rec_keywords = set(df.loc[rec_idx, "keywords"].split(", "))
+        rec_genres = set(str(df.loc[rec_idx, "genres"]).split(", "))
+        rec_keywords = set(str(df.loc[rec_idx, "keywords"]).split(", "))
         is_relevant = bool(true_genres & rec_genres or true_keywords & rec_keywords)
         y_true.append(1 if is_relevant else 0)
         y_pred.append(1)
