@@ -30,7 +30,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 logger.info("Loading data...")
-df = load_data(max_missing=3)
+df = load_data(max_missing=2)
 
 logger.info("Filtering important columns...")
 df = filter_important_columns(df)
