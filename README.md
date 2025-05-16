@@ -20,30 +20,26 @@ With the growing volume of movies available, users often struggle to find conten
 
 ## Goals
 
-•⁠  ⁠*Recommendation Engine*: Suggest movies based on content similarity using TF-IDF and k-NN models.
-•⁠  ⁠*Explainability*: Provide clear and transparent explanations for recommendations to enhance user trust.
-•⁠  ⁠*Scalable Design*: Modular architecture with a Flask API and MongoDB integration for efficient data handling and deployment.
-•⁠  ⁠*User Experience*: Deliver a user-friendly interface for seamless interaction and recommendations.
-•⁠  ⁠*Data Insights*: Perform exploratory data analysis to uncover patterns and trends in the movie dataset.
+- **Recommendation Engine**: Suggest movies based on content similarity using TF-IDF and k-NN models.
+- **Explainability**: Provide clear and transparent explanations for recommendations to enhance user trust.
+- **Scalable Design**: Modular architecture with a Flask API and MongoDB integration for efficient data handling and deployment.
+- **User Experience**: Deliver a user-friendly interface for seamless interaction and recommendations.
+- **Data Insights**: Perform exploratory data analysis to uncover patterns and trends in the movie dataset.
 
 ---
-
 ## Assumptions and Hypotheses
 
-•⁠  ⁠Movie descriptions and metadata are sufficient to capture user preferences and generate meaningful recommendations.
-•⁠  ⁠Users value transparency and trust in recommendation systems, which is achieved through Explainable AI (XAI).
-
+- **Movie descriptions and metadata** are sufficient to capture user preferences and generate meaningful recommendations.
+- **Users value transparency and trust** in recommendation systems, which is achieved through Explainable AI (XAI).
 ---
-
 ## Technical Overview
 
 ### Features
-•⁠  ⁠*Content-Based Filtering*: Recommends movies using TF-IDF vectors and cosine similarity for similarity computation, along with k-NN models for enhanced accuracy.
-•⁠  ⁠*Explainable AI*: Highlights key features contributing to recommendations, enhancing user trust.
-•⁠  ⁠*Modular Design*: Separation of concerns for data processing, model training, and API integration.
-•⁠  ⁠*Flask API*: Exposes endpoints for recommendations and explanations, ensuring a user-friendly interface.
-•⁠  ⁠*MongoDB Integration*: Efficiently stores movie metadata and user interactions for scalability and performance.
-
+- **Content-Based Filtering**: Recommends movies using TF-IDF vectors and cosine similarity for similarity computation, along with k-NN models for enhanced accuracy.
+- **Explainable AI**: Highlights key features contributing to recommendations, enhancing user trust.
+- **Modular Design**: Separation of concerns for data processing, model training, and API integration.
+- **Flask API**: Exposes endpoints for recommendations and explanations, ensuring a user-friendly interface.
+- **MongoDB Integration**: Efficiently stores movie metadata and user interactions for scalability and performance.
 ---
 
 ## Project Structure
