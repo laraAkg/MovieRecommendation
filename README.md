@@ -2,180 +2,208 @@
 
 ## Project Objective & Context
 
-This project aims to develop a **content-based Movie Recommendation System** that leverages **TF-IDF** and **cosine similarity** to recommend movies based on their descriptions. The system incorporates **Explainable AI (XAI)** features to provide insights into why specific recommendations are made. It is implemented as a **Flask web API** with a **MongoDB backend** for data storage.
+This project aims to develop a *content-based Movie Recommendation System* that leverages *TF-IDF* and *k-Nearest Neighbors (k-NN)* to recommend movies based on their descriptions and metadata. The system incorporates *Explainable AI (XAI)* features to provide insights into why specific recommendations are made. It is implemented as a *Flask web API* with a *MongoDB backend* for data storage.
 
-### Dataset
-The dataset used for this project was sourced from [Kaggle]([https://www.kaggle.com/](https://www.kaggle.com/datasets/rounakbanik/the-movies-dataset)), containing movie metadata.
+---
 
-### Problem Statement
-With the growing volume of movies available, users often struggle to find content tailored to their preferences. This project addresses the challenge by building a recommendation system that provides personalized movie suggestions while ensuring transparency through explainable recommendations.
+## Dataset
 
-### Goals
-- **Recommendation Engine**: Suggest movies based on content similarity.
-- **Explainability**: Provide clear explanations for recommendations.
-- **Scalable Design**: Modular architecture with a Flask API and MongoDB integration.
+The dataset used for this project was sourced from [Kaggle](https://www.kaggle.com/datasets/rounakbanik/the-movies-dataset), containing movie metadata such as titles, genres, cast, crew, and more.
 
-### Assumptions and Hypotheses
-- Movie descriptions and metadata are sufficient to capture user preferences.
-- TF-IDF effectively represents textual data for similarity computation.
-- Users value transparency in recommendation systems.
+---
+
+## Problem Statement
+
+With the growing volume of movies available, users often struggle to find content tailored to their preferences. This project addresses the challenge by building a recommendation system that provides personalized movie suggestions.
+
+---
+
+## Goals
+
+•⁠  ⁠*Recommendation Engine*: Suggest movies based on content similarity using TF-IDF and k-NN models.
+•⁠  ⁠*Explainability*: Provide clear and transparent explanations for recommendations to enhance user trust.
+•⁠  ⁠*Scalable Design*: Modular architecture with a Flask API and MongoDB integration for efficient data handling and deployment.
+•⁠  ⁠*User Experience*: Deliver a user-friendly interface for seamless interaction and recommendations.
+•⁠  ⁠*Data Insights*: Perform exploratory data analysis to uncover patterns and trends in the movie dataset.
+
+---
+
+## Assumptions and Hypotheses
+
+•⁠  ⁠Movie descriptions and metadata are sufficient to capture user preferences and generate meaningful recommendations.
+•⁠  ⁠Users value transparency and trust in recommendation systems, which is achieved through Explainable AI (XAI).
 
 ---
 
 ## Technical Overview
 
 ### Features
-- **Content-Based Filtering**: Recommends movies using TF-IDF and cosine similarity.
-- **Explainable AI**: Highlights key features contributing to recommendations.
-- **Modular Design**: Separation of concerns for data processing, model training, and API.
-- **Flask API**: Exposes endpoints for recommendations and explanations.
-- **MongoDB Integration**: Stores movie data and user interactions.
-
-### Project Structure
-```
-MovieRecommendation/
-├── src/
-│   ├── data_processing/      # ETL: cleaning, feature‐engineering, loaders
-│   │   ├── clean_dataset.py
-│   │   ├── data_cleaner.py
-│   │   ├── data_loader.py
-│   │   └── mongodb_handler.py
-│   │
-│   ├── model/                # Training & serialization
-│   │   └── build_model.py    # TF-IDF fitting, cosine matrix, save artifacts
-│   │
-│   └── main/                 # Flask web layer
-│       ├── app.py        
-│       ├── explanation.py        
-│       ├── recommendation.py        
-│       ├── static/          
-│       │   └── script.js
-│       └── templates/        
-│           ├── index.html
-│           ├── 404.html
-│           └── 500.html
-│
-├── data/                     # raw CSVs
-│   ├── credits.csv                  
-│   ├── keywords.csv            
-│   └── movies_metadata.csv         
-│
-├── created_model/            # created .pkl model
-│   └── light_model.pkl
-│
-├── .env.example              # env template (MONGO_URI, DB_NAME, COLLECTION_NAME, SECRET_KEY)
-├── requirements.txt          # Required dependencies
-├── movie_eda.ipynb           
-└── README.md                
-
-```
+•⁠  ⁠*Content-Based Filtering*: Recommends movies using TF-IDF vectors and cosine similarity for similarity computation, along with k-NN models for enhanced accuracy.
+•⁠  ⁠*Explainable AI*: Highlights key features contributing to recommendations, enhancing user trust.
+•⁠  ⁠*Modular Design*: Separation of concerns for data processing, model training, and API integration.
+•⁠  ⁠*Flask API*: Exposes endpoints for recommendations and explanations, ensuring a user-friendly interface.
+•⁠  ⁠*MongoDB Integration*: Efficiently stores movie metadata and user interactions for scalability and performance.
 
 ---
 
+## Project Structure
+
+⁠ text
+MovieRecommendation/
+├── Dockerfile               # Docker configuration file for containerization
+├── README.md                # Project documentation
+├── requirements.txt         # Python dependencies
+├── .gitignore
+├── data/                    # Dataset directory
+│   ├── credits.csv              # Dataset with movie credits information
+│   ├── keywords.csv             # Movie-related keywords
+│   └── movies_metadata.csv      # Metadata about movies
+├── images/                  # Images used in documentation
+│   ├── Error_msg.png            # Screenshot of an error message
+│   ├── Movie_detail.png         # Screenshot showing movie details
+│   ├── Movie_recommender.png    # Screenshot of the recommendation system
+│   └── Suggestions.png          # Screenshot of recommended suggestions
+└── src/                     # Source code directory
+    └── main/
+        ├── all_metrics_performance.png   # Performance metrics visualization
+        ├── app.py                   # Main application (e.g., Flask API)
+        ├── build_model.py           # Builds the recommendation model
+        ├── clean_dataset.py         # Data cleaning and preprocessing
+        ├── created_model/           # Saved ML models
+        │   ├── knn_model.pkl
+        │   └── light_model.pkl
+        ├── data_loader.py           # Loads and preprocesses data
+        ├── model_evaluator.py       # Evaluates model performance
+        ├── mongodb_handler.py       # MongoDB interaction module
+        ├── movie_eda.ipynb          # Exploratory Data Analysis (EDA) notebook
+        ├── recommendation.py        # Generates movie recommendations
+        ├── static/                  # Static files (JS, CSS)
+        │   └── script.js
+        ├── templates/               # HTML templates for the web app
+        │   ├── 404.html
+        │   ├── 500.html
+        │   └── index.html
+        └── xai.ipynb                # Explainable AI (XAI) analysis notebook
+
+ ⁠
+_
+
+
 ## Installation
-1. **Clone the repository**:
-   ```bash
-   git clone https://github.com/yourusername/MovieRecommendation.git
+
+1.⁠ ⁠*Clone the Repository*:
+   ⁠ bash
+   git clone https://github.com/laraAkg/MovieRecommendation.git
    cd MovieRecommendation
-   ```
+    ⁠
 
-2. **Set up a virtual environment**:
-   ```bash
-   python3 -m venv venv
-   source venv/bin/activate       # macOS/Linux
-   venv\Scripts\activate          # Windows
-   ```
+2.⁠ ⁠*Set Up a Virtual Environment*:
+   - For macOS/Linux:
+     ⁠ bash
+     python3 -m venv venv
+     source venv/bin/activate
+      ⁠
 
-3. **Install dependencies**:
-   ```bash
-   pip install -r requirements.txt
-   ```
+   - For Windows:
+     ⁠ bash
+     python -m venv venv
+     venv\Scripts\activate
+      ⁠
 
-4. **Configure environment variables**:
-   - Copy `.env_example` to `.env`:
-     ```bash
+3.⁠ ⁠*Configure Environment Variables*:
+   - Copy ⁠ .env_example ⁠ to ⁠ .env ⁠:
+     ⁠ bash
      cp .env_example .env
-     ```
-   - Update `.env` with your MongoDB URI:
-     ```
-     MONGO_URI=mongodb://localhost:27017/movies
-     ```
+      ⁠
 
-5. **Dataset Setup**:
+   - Update the ⁠ .env ⁠ file with your MongoDB details. Use the following structure:
+     ⁠ env
+     MONGO_URI=mongodb+srv://<USERNAME>:<PASSWORD>@movierecommendation.2y0pw.mongodb.net/?retryWrites=true&w=majority&appName=MovieRecommendation
+     DB_NAME=netflix_db
+     COLLECTION_NAME=recommendation_data
+     SECRET_KEY="SeCrEt_K3y"
+      ⁠
 
-Due to file size limits on GitHub, the raw CSVs are not included in this repository. Please download the following files from Kaggle and place them into the `data/` folder before running the pipeline:
+   - Replace ⁠ <username> ⁠& ⁠ <password> ⁠with your actual MongoDB credentials.
 
-1. [movies_metadata.csv](https://www.kaggle.com/datasets/rounakbanik/the-movies-dataset?select=movies_metadata.csv)  
-2. [credits.csv](https://www.kaggle.com/datasets/rounakbanik/the-movies-dataset?select=credits.csv)  
-3. [keywords.csv](https://www.kaggle.com/datasets/rounakbanik/the-movies-dataset?select=keywords.csv)  
+4.⁠ ⁠*Download the Dataset from Kaggle*:  
+   Due to file size limits on GitHub, the raw CSV files are not included in this repository.  
+   Please download the following files from Kaggle and place them into the ⁠ data ⁠ folder before running the pipeline:
+   
+    1. [movies_metadata.csv](https://www.kaggle.com/datasets/rounakbanik/the-movies-dataset?select=movies_metadata.csv)  
+    2. [credits.csv](https://www.kaggle.com/datasets/rounakbanik/the-movies-dataset?select=credits.csv)  
+    3. [keywords.csv](https://www.kaggle.com/datasets/rounakbanik/the-movies-dataset?select=keywords.csv)  
+
+   Place these files in the following directory structure:
+   
+⁠    MovieRecommendation/
+   └── data/
+       ├── movies_metadata.csv
+       ├── credits.csv
+       └── keywords.csv
+    ⁠
+
+5.⁠ ⁠*Install Dependencies*:
+   - Ensure you are in the *root directory* of the project (⁠ MovieRecommendation/ ⁠):
+     ⁠ bash
+     pip install -r requirements.txt
+      ⁠
 
 ---
 
 ## Running the Project
 
-1. **Data Cleaning & Preparation**  
-   ```bash
-   python src/data_processing/clean_dataset.py
-   ```
+1.⁠ ⁠*Clean and Prepare the Data*:  
+   Run the following script to clean the dataset and load it into MongoDB:
+   ⁠ bash
+   python src/main/clean_dataset.py
+    ⁠
 
-2. **Model Training & Serialization**  
-   ```bash
-   python src/model/build_model.py
-   ```
+2.⁠ ⁠*Build the Models*:  
+   Train the recommendation models (TF-IDF and k-NN) and save them as ⁠ .pkl ⁠ files:
+   ⁠ bash
+   python src/main/build_model.py
+    ⁠
 
-3. **Start the Flask API**  
-   ```bash
+3.⁠ ⁠*Start the Flask Server*:  
+   Launch the Flask application:
+   ⁠ bash
    python src/main/app.py
-   ```  
+    ⁠
 
-4. **Open the Application**  
-   Once the Flask API is running, open your browser and navigate to [http://127.0.0.1:5000/](http://127.0.0.1:5000/) to access the application.
+4.⁠ ⁠*Open the Application*:  
+   Once the Flask API is running, open your browser and navigate to [http://127.0.0.1:5002/](http://127.0.0.1:5002/) to access the application.
 
----
 
-## 📊 API Usage
+---   
 
-### Endpoints
-1. **Get Recommendations**  
-  - **URL**: `/`
-  - **Method**: `POST`
-  - **Description**: Submits a movie title to fetch recommendations. Handles errors gracefully and provides a list of similar movies with their similarity scores.
+## API Usage
+
+The Flask API provides the following endpoints:
+
+1.⁠ ⁠⁠ / ⁠ – *Main Page*
+   - *Method*: ⁠ GET ⁠ and ⁠ POST ⁠
+   - *Description*:
+     - On ⁠ GET ⁠: Displays the main page where users can input a movie title and select the recommendation model (TF-IDF or k-NN).
+     - On ⁠ POST ⁠: Accepts a movie title and returns a list of recommended movies.
+
+2.⁠ ⁠⁠ /titles ⁠ – *Fetch Movie Titles*
+   - *Method*: ⁠ GET ⁠
+   - *Description*: Returns a list of all movie titles in the dataset for autocomplete functionality.
 
 ---
 
 ## Reproducibility & Configuration
 
-### Environment Variables
-- **MONGO_URI**: MongoDB connection string (e.g., `mongodb://localhost:27017/movies`).
+*Environment Variables*:
 
-### Reproducibility Steps
-1. Ensure all dependencies are installed using `requirements.txt`.
-2. Use the provided `.env_example` to configure your environment.
-3. Follow the installation steps to preprocess data, train the model, and start the API.
+   Ensure the ⁠ .env ⁠ file is configured with MongoDB credentials.
 
----
+*Reproducibility Steps*:
+1.⁠ ⁠Ensure all dependencies are installed using ⁠ requirements.txt ⁠.
+2.⁠ ⁠Use the provided ⁠ .env_example ⁠ to configure your environment.
+3.⁠ ⁠Follow the installation steps to preprocess data, train the model, and start the API.
 
-## Use of AI Tools (Copilot & ChatGpt)
-
-- **ChatGPT Assistance:**  
-  - Drafted README structure and markdown (`README.md`).  
-  - Generated boilerplate code snippets for Flask routes.  
-  - Generated boilerplate HTML templates and JavaScript (`.html` & `.js`) for the frontend.  
-- **Self-Developed:**  
-  - Core TF-IDF computation & cosine similarity logic.  
-  - XAI explanation extraction module.  
-  - MongoDB integration and API orchestration.
-
----
-
-## Documentation & Attribution
-
-### External Sources
-- **TF-IDF**: [Scikit-learn Documentation](https://scikit-learn.org/stable/modules/feature_extraction.html#tfidf-term-weighting)
-- **Flask**: [Flask Documentation](https://flask.palletsprojects.com/)
-- **MongoDB**: [MongoDB Documentation](https://www.mongodb.com/docs/)
-
----
 
 ---
 
@@ -183,20 +211,78 @@ Due to file size limits on GitHub, the raw CSVs are not included in this reposit
 
 Before building the recommendation system, an exploratory data analysis (EDA) was conducted to better understand the dataset and extract meaningful insights. The EDA process included:
 
-1. **Data Overview**:
+1.⁠ ⁠*Data Overview*:
    - Summarized the dataset to identify missing values, outliers, and inconsistencies.
-   - Analyzed key statistics
+   - Analyzed key statistics.
 
-2. **Relationships and Correlations**:
-   - Explored relationships between features (Correlation Matrix)
-   - Created histograms and scatterplots to visualize distributions and relationships.
+2.⁠ ⁠*Relationships and Correlations*:
+   - Explored relationships between features using a correlation matrix.
+   - Created histograms and scatterplots to visualize distributions and relationships, such as:
+     - *Vote Count vs. Vote Average*
+     - *Budget vs. Vote Average*
+     - *Runtime vs. Vote Count*
 
-3. **Hypothesis Testing**:
-   - Tested hypotheses, such as whether higher-budget movies tend to have higher ratings.
+3.⁠ ⁠*Hypothesis Testing*:
+   - Tested hypotheses, such as:
+     - Do higher-budget movies tend to have higher ratings?
+     - Do newer movies receive more votes?
 
-The EDA was performed in a Jupyter Notebook located in the `src/main/movie_eda.ipynb` file. This analysis provided the foundation for data cleaning, feature engineering, and model development.
+The EDA was performed in a Jupyter Notebook located in the ⁠ movie_eda.ipynb ⁠ file. This analysis provided the foundation for data cleaning, feature engineering, and model development.
 
 ---
+
+## XAI
+
+
+---
+
+
+## Docker
+
+This project has been fully containerized using a custom `Dockerfile` and is now available on Docker Hub.
+
+The Docker image includes all required dependencies and can be used to deploy the application in any Docker-supported environment.
+
+- **Docker Hub:** lara283/movie-recommendation
+- **Version:** `latest`
+
+```docker pull lara283/movie_recommendation:latest```
+
+![Docker](images/Error_msg.png)
+
+---
+
+## Use of AI Tools (Copilot & ChatGPT)
+
+•⁠  ⁠*ChatGPT Assistance*:  
+  ChatGPT was used to:
+  - Draft the README structure and markdown (⁠ README.md ⁠).
+  - Provide suggestions for documentation and clear descriptions of project sections.
+  - Generate boilerplate code snippets for Flask routes.
+  - Generate boilerplate HTML templates and JavaScript (⁠ .html ⁠ & ⁠ .js ⁠) for the frontend.
+  - Assist in formulating installation and configuration instructions.
+
+•⁠  ⁠*GitHub Copilot*:  
+  GitHub Copilot was used to:
+  - Generate code snippets for tasks like loading environment variables or building models.
+  - Suggest implementations for functions such as data cleaning, model training, and API endpoints.
+  - Accelerate development through context-aware code completions.
+
+---
+
+## Documentation & Attribution
+
+### External Sources
+•⁠  ⁠*TF-IDF*: [Scikit-learn Documentation](http://scikit-learn.org/stable/modules/feature_extraction.html#tfidf-term-weighting)  
+•⁠  ⁠*Cosine Similarity*: [Scikit-learn Documentation](http://scikit-learn.org/stable/modules/generated/sklearn.metrics.pairwise.cosine_similarity.html)  
+•⁠  ⁠*MongoDB*: [MongoDB Documentation](http://www.mongodb.com/docs/)  
+  
+
+### Acknowledgments
+•⁠  ⁠*Kaggle Dataset*: [The Movies Dataset](http://www.kaggle.com/datasets/rounakbanik/the-movies-dataset)  
+---
+
+
 ## Screenshots
 
 ### Movie recommender
@@ -210,3 +296,5 @@ The EDA was performed in a Jupyter Notebook located in the `src/main/movie_eda.i
 
 ### Error message
 ![Error message](images/Error_msg.png)
+
+---
