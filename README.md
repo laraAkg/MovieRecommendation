@@ -130,9 +130,9 @@ _
    Due to file size limits on GitHub, the raw CSV files are not included in this repository.  
    Please download the following files from Kaggle and place them into the ⁠ data ⁠ folder before running the pipeline:
    
-    1. [movies_metadata.csv](https://www.kaggle.com/datasets/rounakbanik/the-movies-dataset?select=movies_metadata.csv)  
-    2. [credits.csv](https://www.kaggle.com/datasets/rounakbanik/the-movies-dataset?select=credits.csv)  
-    3. [keywords.csv](https://www.kaggle.com/datasets/rounakbanik/the-movies-dataset?select=keywords.csv)  
+    [movies_metadata.csv](https://www.kaggle.com/datasets/rounakbanik/the-movies-dataset?select=movies_metadata.csv)  
+    [credits.csv](https://www.kaggle.com/datasets/rounakbanik/the-movies-dataset?select=credits.csv)  
+    [keywords.csv](https://www.kaggle.com/datasets/rounakbanik/the-movies-dataset?select=keywords.csv)  
 
    Place these files in the following directory structure:
 
@@ -201,10 +201,9 @@ The Flask API provides the following endpoints:
    Ensure the ⁠ .env ⁠ file is configured with MongoDB credentials.
 
 *Reproducibility Steps*:
-1.⁠ ⁠Ensure all dependencies are installed using ⁠ requirements.txt ⁠.
-2.⁠ ⁠Use the provided ⁠ .env_example ⁠ to configure your environment.
-3.⁠ ⁠Follow the installation steps to preprocess data, train the model, and start the API.
-
+   1.⁠ ⁠Ensure all dependencies are installed using ⁠ requirements.txt ⁠.
+   2.⁠ ⁠Use the provided ⁠ .env_example ⁠ to configure your environment.
+   3.⁠ ⁠Follow the installation steps to preprocess data, train the model, and start the API.
 
 ---
 
