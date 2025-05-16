@@ -197,13 +197,12 @@ The Flask API provides the following endpoints:
 ## Reproducibility & Configuration
 
 *Environment Variables*:
-
-   Ensure the ⁠ .env ⁠ file is configured with MongoDB credentials.
+Ensure the ⁠ .env ⁠ file is configured with MongoDB credentials.
 
 *Reproducibility Steps*:
-   1.⁠ ⁠Ensure all dependencies are installed using ⁠ requirements.txt ⁠.
-   2.⁠ ⁠Use the provided ⁠ .env_example ⁠ to configure your environment.
-   3.⁠ ⁠Follow the installation steps to preprocess data, train the model, and start the API.
+1.⁠ ⁠Ensure all dependencies are installed using ⁠ requirements.txt
+2.⁠ ⁠Use the provided ⁠ .env_example ⁠ to configure your environment
+3.⁠ ⁠Follow the installation steps to preprocess data, train the model, and start the API
 
 ---
 
