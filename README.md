@@ -48,7 +48,7 @@ With the growing volume of movies available, users often struggle to find conten
 
 ## Project Structure
 
-⁠ text
+```
 MovieRecommendation/
 ├── Dockerfile               # Docker configuration file for containerization
 ├── README.md                # Project documentation
@@ -84,7 +84,7 @@ MovieRecommendation/
         │   ├── 500.html
         │   └── index.html
         └── xai.ipynb                # Explainable AI (XAI) analysis notebook
-
+```
  ⁠
 _
 
@@ -135,13 +135,14 @@ _
     3. [keywords.csv](https://www.kaggle.com/datasets/rounakbanik/the-movies-dataset?select=keywords.csv)  
 
    Place these files in the following directory structure:
-   
-⁠    MovieRecommendation/
+
+   ```
+   MovieRecommendation/
    └── data/
-       ├── movies_metadata.csv
-       ├── credits.csv
-       └── keywords.csv
-    ⁠
+      ├── movies_metadata.csv
+      ├── credits.csv
+      └── keywords.csv
+   ```
 
 5.⁠ ⁠*Install Dependencies*:
    - Ensure you are in the *root directory* of the project (⁠ MovieRecommendation/ ⁠):
@@ -248,7 +249,7 @@ The Docker image includes all required dependencies and can be used to deploy th
 
 ```docker pull lara283/movie_recommendation:latest```
 
-![Docker](images/Error_msg.png)
+![Docker](images/Docker.png)
 
 ---
 
@@ -273,13 +274,11 @@ The Docker image includes all required dependencies and can be used to deploy th
 ## Documentation & Attribution
 
 ### External Sources
-•⁠  ⁠*TF-IDF*: [Scikit-learn Documentation](http://scikit-learn.org/stable/modules/feature_extraction.html#tfidf-term-weighting)  
-•⁠  ⁠*Cosine Similarity*: [Scikit-learn Documentation](http://scikit-learn.org/stable/modules/generated/sklearn.metrics.pairwise.cosine_similarity.html)  
-•⁠  ⁠*MongoDB*: [MongoDB Documentation](http://www.mongodb.com/docs/)  
+⁠*TF-IDF*: [Scikit-learn Documentation](http://scikit-learn.org/stable/modules/feature_extraction.html#tfidf-term-weighting)  
+⁠*Cosine Similarity*: [Scikit-learn Documentation](http://scikit-learn.org/stable/modules/generated/sklearn.metrics.pairwise.cosine_similarity.html)  
+⁠*MongoDB*: [MongoDB Documentation](http://www.mongodb.com/docs/)  
+⁠*Kaggle Dataset*: [The Movies Dataset](http://www.kaggle.com/datasets/rounakbanik/the-movies-dataset)  
   
-
-### Acknowledgments
-•⁠  ⁠*Kaggle Dataset*: [The Movies Dataset](http://www.kaggle.com/datasets/rounakbanik/the-movies-dataset)  
 ---
 
 
