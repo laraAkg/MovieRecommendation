@@ -227,6 +227,13 @@ The EDA was performed in a Jupyter Notebook located in the ⁠ movie_eda.ipynb
 
 ## XAI
 
+The `xai.ipynb` notebook demonstrates the use of Explainable AI (XAI) to enhance transparency in the recommendation system. It provides interpretable insights into why certain movies are recommended, using the following techniques:
+
+- **SHAP (SHapley Additive exPlanations)**: Visualizes the contribution of each feature to the model's output, helping explain why a particular movie was suggested.
+- **Feature Importance**: Highlights key features such as genre, keywords, and movie descriptions that influence recommendation decisions.
+- **Visual Interpretations**: Includes example plots that illustrate which factors had the greatest impact on the similarity between movies.
+
+The goal of the XAI component is to build trust with users by providing clear and understandable explanations behind the recommendations.
 
 ---
 
