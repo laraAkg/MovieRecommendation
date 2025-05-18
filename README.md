@@ -82,43 +82,43 @@ MovieRecommendation/
         └── xai.ipynb                # Explainable AI (XAI) analysis notebook
 ```
  ⁠
-_
 
 
 ## Installation
 
-1.⁠ ⁠*Clone the Repository*:
-   ⁠ bash
-   git clone https://github.com/laraAkg/MovieRecommendation.git
+1. **Clone the Repository**:
+   ```bash
+   git clone https://github.com/yourusername/MovieRecommendation.git
    cd MovieRecommendation
-    ⁠
+   ```
 
-2.⁠ ⁠*Set Up a Virtual Environment*:
-   - For macOS/Linux:
-     ⁠ bash
+2. **Set Up a Virtual Environment**:
+   
+- For macOS/Linux:
+     ```bash
      python3 -m venv venv
      source venv/bin/activate
-      ⁠
+     ```
 
-   - For Windows:
-     ⁠ bash
+- For Windows:
+     ```bash
      python -m venv venv
      venv\Scripts\activate
-      ⁠
+     ```
 
-3.⁠ ⁠*Configure Environment Variables*:
-   - Copy ⁠ .env_example ⁠ to ⁠ .env ⁠:
-     ⁠ bash
-     cp .env_example .env
-      ⁠
-
-   - Update the ⁠ .env ⁠ file with your MongoDB details. Use the following structure:
-     ⁠ env
+3.⁠ ⁠**Configure Environment Variables**:
+    - Copy `.env.example` to `.env`:
+     ```bash
+     cp .env.example .env
+     ```
+ 
+   - Update the `.env` file with your MongoDB details. Use the following structure:
+     ```env
      MONGO_URI=mongodb+srv://<USERNAME>:<PASSWORD>@movierecommendation.2y0pw.mongodb.net/?retryWrites=true&w=majority&appName=MovieRecommendation
      DB_NAME=netflix_db
      COLLECTION_NAME=recommendation_data
      SECRET_KEY="SeCrEt_K3y"
-      ⁠
+     ```
 
    - Replace ⁠ <username> ⁠& ⁠ <password> ⁠with your actual MongoDB credentials.
 
@@ -126,9 +126,9 @@ _
    Due to file size limits on GitHub, the raw CSV files are not included in this repository.  
    Please download the following files from Kaggle and place them into the ⁠ data ⁠ folder before running the pipeline:
    
-    [movies_metadata.csv](https://www.kaggle.com/datasets/rounakbanik/the-movies-dataset?select=movies_metadata.csv)  
-    [credits.csv](https://www.kaggle.com/datasets/rounakbanik/the-movies-dataset?select=credits.csv)  
-    [keywords.csv](https://www.kaggle.com/datasets/rounakbanik/the-movies-dataset?select=keywords.csv)  
+[movies_metadata.csv](https://www.kaggle.com/datasets/rounakbanik/the-movies-dataset?select=movies_metadata.csv)  
+[credits.csv](https://www.kaggle.com/datasets/rounakbanik/the-movies-dataset?select=credits.csv)  
+[keywords.csv](https://www.kaggle.com/datasets/rounakbanik/the-movies-dataset?select=keywords.csv)  
 
    Place these files in the following directory structure:
 
@@ -140,33 +140,33 @@ _
       └── keywords.csv
    ```
 
-5.⁠ ⁠*Install Dependencies*:
-   - Ensure you are in the *root directory* of the project (⁠ MovieRecommendation/ ⁠):
-     ⁠ bash
-     pip install -r requirements.txt
-      ⁠
+5. **Dependencies**:  
+   Ensure you are in the *root directory* of the project (⁠ MovieRecommendation/ ⁠):
+   ```bash
+   pip install -r requirements.txt
+   ```
 
 ---
 
 ## Running the Project
 
-1.⁠ ⁠*Clean and Prepare the Data*:  
+1. **Clean and Prepare the Data**:  
    Run the following script to clean the dataset and load it into MongoDB:
-   ⁠ bash
+   ```bash
    python src/main/clean_dataset.py
-    ⁠
+   ```
 
-2.⁠ ⁠*Build the Models*:  
-   Train the recommendation models (TF-IDF and k-NN) and save them as ⁠ .pkl ⁠ files:
-   ⁠ bash
+2. **Build the Models**:  
+   Train the recommendation models (TF-IDF and k-NN) and save them as `.pkl` files:
+   ```bash
    python src/main/build_model.py
-    ⁠
+   ```
 
-3.⁠ ⁠*Start the Flask Server*:  
+3. **Start the Flask Server**:  
    Launch the Flask application:
-   ⁠ bash
+   ```bash
    python src/main/app.py
-    ⁠
+   ```
 
 4.⁠ ⁠*Open the Application*:  
    Once the Flask API is running, open your browser and navigate to [http://127.0.0.1:5002/](http://127.0.0.1:5002/) to access the application.
